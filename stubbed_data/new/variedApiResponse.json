@@ -1,0 +1,723 @@
+[
+  {
+    "conversationId": "xyz789",
+    "createdAt": "2025-03-25T16:45:00Z",
+    "originalText": "Although he was very tired but he decided to keep working because he don't want to fall behind. The weather was so hot, so I decided to not go outside, even though I had promised to meet my friend who is waited for me. She always have been interested in science, and her brother who is also liking physics encouraged her to study engineering. In the meeting yesterday, he say that he will finish the report by today, but he haven't send me anything yet. The book what I bought yesterday was very interesting, and I am plan to read more by same author.",
+    "sentenceFeedback": [
+      {
+        "id": "s1",
+        "original": "Although he was very tired but he decided to keep working because he don't want to fall behind.",
+        "corrected": "Although he was very tired, he decided to keep working because he didn't want to fall behind.",
+        "errors": [
+          {
+            "id": "e1",
+            "error": "Although he was very tired but",
+            "reason": "Redundant conjunction: 'but' is unnecessary after 'Although'.",
+            "suggestion": "Remove 'but' for correct sentence structure.",
+            "improvedClause": "Although he was very tired, he decided to keep working"
+          },
+          {
+            "id": "e2",
+            "error": "he don't want",
+            "reason": "Incorrect verb form: 'don't' should match past tense.",
+            "suggestion": "Replace 'don't' with 'didn't'.",
+            "improvedClause": "he didn't want to fall behind"
+          }
+        ]
+      },
+      {
+        "id": "s2",
+        "original": "The weather was so hot, so I decided to not go outside, even though I had promised to meet my friend who is waited for me.",
+        "corrected": "The weather was so hot that I decided not to go outside, even though I had promised to meet my friend who was waiting for me.",
+        "errors": [
+          {
+            "id": "e3",
+            "error": "so hot, so",
+            "reason": "Incorrect conjunction: 'so hot that' is the correct form.",
+            "suggestion": "Use 'so hot that' instead.",
+            "improvedClause": "The weather was so hot that I decided not to go outside"
+          },
+          {
+            "id": "e4",
+            "error": "to not go",
+            "reason": "Incorrect word order: 'not to go' is preferred.",
+            "suggestion": "Switch to 'not to go'.",
+            "improvedClause": "I decided not to go outside"
+          },
+          {
+            "id": "e5",
+            "error": "who is waited",
+            "reason": "Incorrect verb tense: 'is waited' is incorrect.",
+            "suggestion": "Use 'was waiting' instead.",
+            "improvedClause": "my friend who was waiting for me"
+          }
+        ]
+      },
+      {
+        "id": "s3",
+        "original": "She always have been interested in science, and her brother who is also liking physics encouraged her to study engineering.",
+        "corrected": "She has always been interested in science, and her brother, who also likes physics, encouraged her to study engineering.",
+        "errors": [
+          {
+            "id": "e6",
+            "error": "She always have been",
+            "reason": "Incorrect verb agreement: 'have' should be 'has' for singular subject.",
+            "suggestion": "Replace 'have' with 'has'.",
+            "improvedClause": "She has always been interested in science"
+          },
+          {
+            "id": "e7",
+            "error": "who is also liking physics",
+            "reason": "Incorrect verb form: 'is liking' is unnatural.",
+            "suggestion": "Use 'who also likes physics' instead.",
+            "improvedClause": "her brother, who also likes physics"
+          }
+        ]
+      },
+      {
+        "id": "s4",
+        "original": "In the meeting yesterday, he say that he will finish the report by today, but he haven't send me anything yet.",
+        "corrected": "In the meeting yesterday, he said that he would finish the report by today, but he hasn't sent me anything yet.",
+        "errors": [
+          {
+            "id": "e8",
+            "error": "he say",
+            "reason": "Incorrect verb tense: 'say' should be past tense.",
+            "suggestion": "Replace 'say' with 'said'.",
+            "improvedClause": "he said that he would finish the report"
+          },
+          {
+            "id": "e9",
+            "error": "he will finish",
+            "reason": "Tense mismatch: 'will' should be 'would' to match past context.",
+            "suggestion": "Replace 'will' with 'would'.",
+            "improvedClause": "he said that he would finish the report by today"
+          },
+          {
+            "id": "e10",
+            "error": "he haven't send",
+            "reason": "Incorrect verb form: 'haven't send' should be 'hasn't sent'.",
+            "suggestion": "Replace 'haven't send' with 'hasn't sent'.",
+            "improvedClause": "but he hasn't sent me anything yet"
+          }
+        ]
+      },
+      {
+        "id": "s5",
+        "original": "The book what I bought yesterday was very interesting, and I am plan to read more by same author.",
+        "corrected": "The book that I bought yesterday was very interesting, and I plan to read more by the same author.",
+        "errors": [
+          {
+            "id": "e11",
+            "error": "The book what I bought",
+            "reason": "Incorrect relative pronoun: 'what' should be 'that'.",
+            "suggestion": "Replace 'what' with 'that'.",
+            "improvedClause": "The book that I bought yesterday"
+          },
+          {
+            "id": "e12",
+            "error": "I am plan",
+            "reason": "Incorrect verb form: 'am plan' is not correct.",
+            "suggestion": "Replace 'am plan' with 'plan'.",
+            "improvedClause": "I plan to read more by the same author"
+          },
+          {
+            "id": "e13",
+            "error": "by same author",
+            "reason": "Missing article: 'same author' needs 'the'.",
+            "suggestion": "Insert 'the' before 'same author'.",
+            "improvedClause": "by the same author"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conversationId": "abc123",
+    "createdAt": "2025-04-02T22:15:00Z",
+    "originalText": "He don't knows where is the keys, so he ask me to help him find it. The cat was laying on the table, and the books was scattered everywhere. She don't likes to eat vegetables, even though they is good for her health.",
+    "sentenceFeedback": [
+      {
+        "id": "s1",
+        "original": "He don't knows where is the keys, so he ask me to help him find it.",
+        "corrected": "He doesn't know where the keys are, so he asked me to help him find them.",
+        "errors": [
+          {
+            "id": "e1",
+            "error": "He don't knows",
+            "reason": "Incorrect verb form: 'don't knows' should be 'doesn't know'.",
+            "suggestion": "Replace 'don't knows' with 'doesn't know'.",
+            "improvedClause": "He doesn't know"
+          },
+          {
+            "id": "e2",
+            "error": "where is the keys",
+            "reason": "Incorrect word order: 'where is the keys' should be 'where the keys are'.",
+            "suggestion": "Reorder to 'where the keys are'.",
+            "improvedClause": "where the keys are"
+          },
+          {
+            "id": "e3",
+            "error": "he ask me",
+            "reason": "Incorrect verb tense: 'ask' should be 'asked' to match past tense.",
+            "suggestion": "Replace 'ask' with 'asked'.",
+            "improvedClause": "he asked me"
+          },
+          {
+            "id": "e4",
+            "error": "find it",
+            "reason": "Incorrect pronoun: 'it' should be 'them' to match plural 'keys'.",
+            "suggestion": "Replace 'it' with 'them'.",
+            "improvedClause": "find them"
+          }
+        ]
+      },
+      {
+        "id": "s2",
+        "original": "The cat was laying on the table, and the books was scattered everywhere.",
+        "corrected": "The cat was lying on the table, and the books were scattered everywhere.",
+        "errors": [
+          {
+            "id": "e5",
+            "error": "was laying",
+            "reason": "Incorrect verb: 'laying' should be 'lying' for this context.",
+            "suggestion": "Replace 'laying' with 'lying'.",
+            "improvedClause": "was lying on the table"
+          },
+          {
+            "id": "e6",
+            "error": "books was",
+            "reason": "Incorrect verb agreement: 'was' should be 'were' for plural subject.",
+            "suggestion": "Replace 'was' with 'were'.",
+            "improvedClause": "books were scattered everywhere"
+          }
+        ]
+      },
+      {
+        "id": "s3",
+        "original": "She don't likes to eat vegetables, even though they is good for her health.",
+        "corrected": "She doesn't like to eat vegetables, even though they are good for her health.",
+        "errors": [
+          {
+            "id": "e7",
+            "error": "don't likes",
+            "reason": "Incorrect verb form: 'don't likes' should be 'doesn't like'.",
+            "suggestion": "Replace 'don't likes' with 'doesn't like'.",
+            "improvedClause": "She doesn't like"
+          },
+          {
+            "id": "e8",
+            "error": "they is",
+            "reason": "Incorrect verb agreement: 'is' should be 'are' for plural subject.",
+            "suggestion": "Replace 'is' with 'are'.",
+            "improvedClause": "they are good for her health"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conversationId": "def456",
+    "createdAt": "2025-03-27T19:30:00Z",
+    "originalText": "The boy which I saw yesterday was playing football in the park. She have went to the store to buy some fruits, but she forgets to bring her wallet. The dog runned across the street, and the car almost hitted it.",
+    "sentenceFeedback": [
+      {
+        "id": "s1",
+        "original": "The boy which I saw yesterday was playing football in the park.",
+        "corrected": "The boy whom I saw yesterday was playing football in the park.",
+        "errors": [
+          {
+            "id": "e1",
+            "error": "which I saw",
+            "reason": "Incorrect relative pronoun: 'which' should be 'whom' for a person.",
+            "suggestion": "Replace 'which' with 'whom'.",
+            "improvedClause": "The boy whom I saw yesterday"
+          }
+        ]
+      },
+      {
+        "id": "s2",
+        "original": "She have went to the store to buy some fruits, but she forgets to bring her wallet.",
+        "corrected": "She has gone to the store to buy some fruit, but she forgot to bring her wallet.",
+        "errors": [
+          {
+            "id": "e2",
+            "error": "have went",
+            "reason": "Incorrect verb form: 'have went' should be 'has gone'.",
+            "suggestion": "Replace 'have went' with 'has gone'.",
+            "improvedClause": "She has gone to the store"
+          },
+          {
+            "id": "e3",
+            "error": "fruits",
+            "reason": "Incorrect plural: 'fruits' should be 'fruit' as it is uncountable.",
+            "suggestion": "Replace 'fruits' with 'fruit'.",
+            "improvedClause": "to buy some fruit"
+          },
+          {
+            "id": "e4",
+            "error": "forgets",
+            "reason": "Incorrect verb tense: 'forgets' should be 'forgot' to match past tense.",
+            "suggestion": "Replace 'forgets' with 'forgot'.",
+            "improvedClause": "she forgot to bring her wallet"
+          }
+        ]
+      },
+      {
+        "id": "s3",
+        "original": "The dog runned across the street, and the car almost hitted it.",
+        "corrected": "The dog ran across the street, and the car almost hit it.",
+        "errors": [
+          {
+            "id": "e5",
+            "error": "runned",
+            "reason": "Incorrect verb form: 'runned' should be 'ran'.",
+            "suggestion": "Replace 'runned' with 'ran'.",
+            "improvedClause": "The dog ran across the street"
+          },
+          {
+            "id": "e6",
+            "error": "hitted",
+            "reason": "Incorrect verb form: 'hitted' should be 'hit'.",
+            "suggestion": "Replace 'hitted' with 'hit'.",
+            "improvedClause": "the car almost hit it"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conversationId": "ghi789",
+    "createdAt": "2025-04-03T09:45:00Z",
+    "originalText": "There was many peoples in the room, and everyone were talking loudly. He didn't knew how to solve the problem, so he just leave it unfinished. The flowers in the garden is blooming beautifully, but the grass need to be cut.",
+    "sentenceFeedback": [
+      {
+        "id": "s1",
+        "original": "There was many peoples in the room, and everyone were talking loudly.",
+        "corrected": "There were many people in the room, and everyone was talking loudly.",
+        "errors": [
+          {
+            "id": "e1",
+            "error": "was many peoples",
+            "reason": "Incorrect verb agreement and plural form: 'was' should be 'were', and 'peoples' should be 'people'.",
+            "suggestion": "Replace 'was many peoples' with 'were many people'.",
+            "improvedClause": "There were many people"
+          },
+          {
+            "id": "e2",
+            "error": "everyone were",
+            "reason": "Incorrect verb agreement: 'were' should be 'was' for singular subject.",
+            "suggestion": "Replace 'were' with 'was'.",
+            "improvedClause": "everyone was talking loudly"
+          }
+        ]
+      },
+      {
+        "id": "s2",
+        "original": "He didn't knew how to solve the problem, so he just leave it unfinished.",
+        "corrected": "He didn't know how to solve the problem, so he just left it unfinished.",
+        "errors": [
+          {
+            "id": "e3",
+            "error": "didn't knew",
+            "reason": "Incorrect verb form: 'knew' should be 'know' after 'didn't'.",
+            "suggestion": "Replace 'knew' with 'know'.",
+            "improvedClause": "He didn't know"
+          },
+          {
+            "id": "e4",
+            "error": "leave it",
+            "reason": "Incorrect verb tense: 'leave' should be 'left' to match past tense.",
+            "suggestion": "Replace 'leave' with 'left'.",
+            "improvedClause": "he just left it unfinished"
+          }
+        ]
+      },
+      {
+        "id": "s3",
+        "original": "The flowers in the garden is blooming beautifully, but the grass need to be cut.",
+        "corrected": "The flowers in the garden are blooming beautifully, but the grass needs to be cut.",
+        "errors": [
+          {
+            "id": "e5",
+            "error": "flowers in the garden is",
+            "reason": "Incorrect verb agreement: 'is' should be 'are' for plural subject.",
+            "suggestion": "Replace 'is' with 'are'.",
+            "improvedClause": "The flowers in the garden are blooming beautifully"
+          },
+          {
+            "id": "e6",
+            "error": "grass need",
+            "reason": "Incorrect verb agreement: 'need' should be 'needs' for singular subject.",
+            "suggestion": "Replace 'need' with 'needs'.",
+            "improvedClause": "the grass needs to be cut"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conversationId": "ghi789",
+    "createdAt": "2025-03-28T23:45:00Z",
+    "originalText": "There was many peoples in the room, and everyone were talking loudly. He didn't knew how to solve the problem, so he just leave it unfinished. The flowers in the garden is blooming beautifully, but the grass need to be cut.",
+    "sentenceFeedback": [
+      {
+        "id": "s1",
+        "original": "There was many peoples in the room, and everyone were talking loudly.",
+        "corrected": "There were many people in the room, and everyone was talking loudly.",
+        "errors": [
+          {
+            "id": "e1",
+            "error": "was many peoples",
+            "reason": "Incorrect verb agreement and plural form: 'was' should be 'were', and 'peoples' should be 'people'.",
+            "suggestion": "Replace 'was many peoples' with 'were many people'.",
+            "improvedClause": "There were many people"
+          },
+          {
+            "id": "e2",
+            "error": "everyone were",
+            "reason": "Incorrect verb agreement: 'were' should be 'was' for singular subject.",
+            "suggestion": "Replace 'were' with 'was'.",
+            "improvedClause": "everyone was talking loudly"
+          }
+        ]
+      },
+      {
+        "id": "s2",
+        "original": "He didn't knew how to solve the problem, so he just leave it unfinished.",
+        "corrected": "He didn't know how to solve the problem, so he just left it unfinished.",
+        "errors": [
+          {
+            "id": "e3",
+            "error": "didn't knew",
+            "reason": "Incorrect verb form: 'knew' should be 'know' after 'didn't'.",
+            "suggestion": "Replace 'knew' with 'know'.",
+            "improvedClause": "He didn't know"
+          },
+          {
+            "id": "e4",
+            "error": "leave it",
+            "reason": "Incorrect verb tense: 'leave' should be 'left' to match past tense.",
+            "suggestion": "Replace 'leave' with 'left'.",
+            "improvedClause": "he just left it unfinished"
+          }
+        ]
+      },
+      {
+        "id": "s3",
+        "original": "The flowers in the garden is blooming beautifully, but the grass need to be cut.",
+        "corrected": "The flowers in the garden are blooming beautifully, but the grass needs to be cut.",
+        "errors": [
+          {
+            "id": "e5",
+            "error": "flowers in the garden is",
+            "reason": "Incorrect verb agreement: 'is' should be 'are' for plural subject.",
+            "suggestion": "Replace 'is' with 'are'.",
+            "improvedClause": "The flowers in the garden are blooming beautifully"
+          },
+          {
+            "id": "e6",
+            "error": "grass need",
+            "reason": "Incorrect verb agreement: 'need' should be 'needs' for singular subject.",
+            "suggestion": "Replace 'need' with 'needs'.",
+            "improvedClause": "the grass needs to be cut"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conversationId": "ghi789",
+    "createdAt": "2025-03-28T01:45:00Z",
+    "originalText": "There was many peoples in the room, and everyone were talking loudly. He didn't knew how to solve the problem, so he just leave it unfinished. The flowers in the garden is blooming beautifully, but the grass need to be cut.",
+    "sentenceFeedback": [
+      {
+        "id": "s1",
+        "original": "There was many peoples in the room, and everyone were talking loudly.",
+        "corrected": "There were many people in the room, and everyone was talking loudly.",
+        "errors": [
+          {
+            "id": "e1",
+            "error": "was many peoples",
+            "reason": "Incorrect verb agreement and plural form: 'was' should be 'were', and 'peoples' should be 'people'.",
+            "suggestion": "Replace 'was many peoples' with 'were many people'.",
+            "improvedClause": "There were many people"
+          },
+          {
+            "id": "e2",
+            "error": "everyone were",
+            "reason": "Incorrect verb agreement: 'were' should be 'was' for singular subject.",
+            "suggestion": "Replace 'were' with 'was'.",
+            "improvedClause": "everyone was talking loudly"
+          }
+        ]
+      },
+      {
+        "id": "s2",
+        "original": "He didn't knew how to solve the problem, so he just leave it unfinished.",
+        "corrected": "He didn't know how to solve the problem, so he just left it unfinished.",
+        "errors": [
+          {
+            "id": "e3",
+            "error": "didn't knew",
+            "reason": "Incorrect verb form: 'knew' should be 'know' after 'didn't'.",
+            "suggestion": "Replace 'knew' with 'know'.",
+            "improvedClause": "He didn't know"
+          },
+          {
+            "id": "e4",
+            "error": "leave it",
+            "reason": "Incorrect verb tense: 'leave' should be 'left' to match past tense.",
+            "suggestion": "Replace 'leave' with 'left'.",
+            "improvedClause": "he just left it unfinished"
+          }
+        ]
+      },
+      {
+        "id": "s3",
+        "original": "The flowers in the garden is blooming beautifully, but the grass need to be cut.",
+        "corrected": "The flowers in the garden are blooming beautifully, but the grass needs to be cut.",
+        "errors": [
+          {
+            "id": "e5",
+            "error": "flowers in the garden is",
+            "reason": "Incorrect verb agreement: 'is' should be 'are' for plural subject.",
+            "suggestion": "Replace 'is' with 'are'.",
+            "improvedClause": "The flowers in the garden are blooming beautifully"
+          },
+          {
+            "id": "e6",
+            "error": "grass need",
+            "reason": "Incorrect verb agreement: 'need' should be 'needs' for singular subject.",
+            "suggestion": "Replace 'need' with 'needs'.",
+            "improvedClause": "the grass needs to be cut"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conversationId": "jkl012",
+    "createdAt": "2025-03-29T12:00:00Z",
+    "originalText": "The teacher give us a homework yesterday, but I forget to do it. My friend have already finished his work, and he say he will help me. The questions in the homework was very hard, and I don't understands them.",
+    "sentenceFeedback": [
+      {
+        "id": "s1",
+        "original": "The teacher give us a homework yesterday, but I forget to do it.",
+        "corrected": "The teacher gave us homework yesterday, but I forgot to do it.",
+        "errors": [
+          {
+            "id": "e1",
+            "error": "give",
+            "reason": "Incorrect verb tense: 'give' should be 'gave' to match past tense.",
+            "suggestion": "Replace 'give' with 'gave'.",
+            "improvedClause": "The teacher gave us homework"
+          },
+          {
+            "id": "e2",
+            "error": "a homework",
+            "reason": "Incorrect article usage: 'homework' is uncountable and does not need 'a'.",
+            "suggestion": "Remove 'a'.",
+            "improvedClause": "homework yesterday"
+          },
+          {
+            "id": "e3",
+            "error": "forget",
+            "reason": "Incorrect verb tense: 'forget' should be 'forgot' to match past tense.",
+            "suggestion": "Replace 'forget' with 'forgot'.",
+            "improvedClause": "but I forgot to do it"
+          }
+        ]
+      },
+      {
+        "id": "s2",
+        "original": "My friend have already finished his work, and he say he will help me.",
+        "corrected": "My friend has already finished his work, and he said he would help me.",
+        "errors": [
+          {
+            "id": "e4",
+            "error": "have",
+            "reason": "Incorrect verb agreement: 'have' should be 'has' for singular subject.",
+            "suggestion": "Replace 'have' with 'has'.",
+            "improvedClause": "My friend has already finished his work"
+          },
+          {
+            "id": "e5",
+            "error": "say",
+            "reason": "Incorrect verb tense: 'say' should be 'said' to match past tense.",
+            "suggestion": "Replace 'say' with 'said'.",
+            "improvedClause": "and he said he would help me"
+          },
+          {
+            "id": "e6",
+            "error": "will",
+            "reason": "Tense mismatch: 'will' should be 'would' to match past context.",
+            "suggestion": "Replace 'will' with 'would'.",
+            "improvedClause": "he would help me"
+          }
+        ]
+      },
+      {
+        "id": "s3",
+        "original": "The questions in the homework was very hard, and I don't understands them.",
+        "corrected": "The questions in the homework were very hard, and I don't understand them.",
+        "errors": [
+          {
+            "id": "e7",
+            "error": "was",
+            "reason": "Incorrect verb agreement: 'was' should be 'were' for plural subject.",
+            "suggestion": "Replace 'was' with 'were'.",
+            "improvedClause": "The questions in the homework were very hard"
+          },
+          {
+            "id": "e8",
+            "error": "don't understands",
+            "reason": "Incorrect verb form: 'understands' should be 'understand'.",
+            "suggestion": "Replace 'understands' with 'understand'.",
+            "improvedClause": "I don't understand them"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conversationId": "mno345",
+    "createdAt": "2025-03-30T08:30:00Z",
+    "originalText": "She was cooking dinner when the phone ringed, and she forgets to turn off the stove. The food got burned, and she was very upset because she have worked hard on it.",
+    "sentenceFeedback": [
+      {
+        "id": "s1",
+        "original": "She was cooking dinner when the phone ringed, and she forgets to turn off the stove.",
+        "corrected": "She was cooking dinner when the phone rang, and she forgot to turn off the stove.",
+        "errors": [
+          {
+            "id": "e1",
+            "error": "ringed",
+            "reason": "Incorrect verb form: 'ringed' should be 'rang'.",
+            "suggestion": "Replace 'ringed' with 'rang'.",
+            "improvedClause": "when the phone rang"
+          },
+          {
+            "id": "e2",
+            "error": "forgets",
+            "reason": "Incorrect verb tense: 'forgets' should be 'forgot' to match past tense.",
+            "suggestion": "Replace 'forgets' with 'forgot'.",
+            "improvedClause": "and she forgot to turn off the stove"
+          }
+        ]
+      },
+      {
+        "id": "s2",
+        "original": "The food got burned, and she was very upset because she have worked hard on it.",
+        "corrected": "The food got burned, and she was very upset because she had worked hard on it.",
+        "errors": [
+          {
+            "id": "e3",
+            "error": "have",
+            "reason": "Incorrect verb tense: 'have' should be 'had' to indicate past perfect.",
+            "suggestion": "Replace 'have' with 'had'.",
+            "improvedClause": "because she had worked hard on it"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conversationId": "pqr678",
+    "createdAt": "2025-03-31T15:45:00Z",
+    "originalText": "The children was playing in the park, and one of them fall down and hurted his knee. The parents comes running to help, but the boy was already crying loudly.",
+    "sentenceFeedback": [
+      {
+        "id": "s1",
+        "original": "The children was playing in the park, and one of them fall down and hurted his knee.",
+        "corrected": "The children were playing in the park, and one of them fell down and hurt his knee.",
+        "errors": [
+          {
+            "id": "e1",
+            "error": "was",
+            "reason": "Incorrect verb agreement: 'was' should be 'were' for plural subject.",
+            "suggestion": "Replace 'was' with 'were'.",
+            "improvedClause": "The children were playing in the park"
+          },
+          {
+            "id": "e2",
+            "error": "fall",
+            "reason": "Incorrect verb tense: 'fall' should be 'fell' to match past tense.",
+            "suggestion": "Replace 'fall' with 'fell'.",
+            "improvedClause": "one of them fell down"
+          },
+          {
+            "id": "e3",
+            "error": "hurted",
+            "reason": "Incorrect verb form: 'hurted' should be 'hurt'.",
+            "suggestion": "Replace 'hurted' with 'hurt'.",
+            "improvedClause": "and hurt his knee"
+          }
+        ]
+      },
+      {
+        "id": "s2",
+        "original": "The parents comes running to help, but the boy was already crying loudly.",
+        "corrected": "The parents came running to help, but the boy was already crying loudly.",
+        "errors": [
+          {
+            "id": "e4",
+            "error": "comes",
+            "reason": "Incorrect verb tense: 'comes' should be 'came' to match past tense.",
+            "suggestion": "Replace 'comes' with 'came'.",
+            "improvedClause": "The parents came running to help"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conversationId": "stu901",
+    "createdAt": "2025-04-01T11:20:00Z",
+    "originalText": "He don't likes to wake up early, so he always miss the bus. His teacher have told him many times to be punctual, but he doesn't listens.",
+    "sentenceFeedback": [
+      {
+        "id": "s1",
+        "original": "He don't likes to wake up early, so he always miss the bus.",
+        "corrected": "He doesn't like to wake up early, so he always misses the bus.",
+        "errors": [
+          {
+            "id": "e1",
+            "error": "don't likes",
+            "reason": "Incorrect verb form: 'don't likes' should be 'doesn't like'.",
+            "suggestion": "Replace 'don't likes' with 'doesn't like'.",
+            "improvedClause": "He doesn't like to wake up early"
+          },
+          {
+            "id": "e2",
+            "error": "miss",
+            "reason": "Incorrect verb form: 'miss' should be 'misses' for singular subject.",
+            "suggestion": "Replace 'miss' with 'misses'.",
+            "improvedClause": "so he always misses the bus"
+          }
+        ]
+      },
+      {
+        "id": "s2",
+        "original": "His teacher have told him many times to be punctual, but he doesn't listens.",
+        "corrected": "His teacher has told him many times to be punctual, but he doesn't listen.",
+        "errors": [
+          {
+            "id": "e3",
+            "error": "have",
+            "reason": "Incorrect verb agreement: 'have' should be 'has' for singular subject.",
+            "suggestion": "Replace 'have' with 'has'.",
+            "improvedClause": "His teacher has told him many times"
+          },
+          {
+            "id": "e4",
+            "error": "doesn't listens",
+            "reason": "Incorrect verb form: 'listens' should be 'listen'.",
+            "suggestion": "Replace 'listens' with 'listen'.",
+            "improvedClause": "but he doesn't listen"
+          }
+        ]
+      }
+    ]
+  }
+]

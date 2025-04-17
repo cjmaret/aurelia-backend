@@ -1,0 +1,60 @@
+# Byte-compiled / optimized / compiled Python files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environment
+env/
+venv/
+ENV/
+.venv/
+
+# Environment variables
+.env
+.env.*
+env.development
+env.production
+
+# Logs
+*.log
+*.log.*
+
+# Cache files
+*.cache
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+.eggs/
+*.sqlite3
+
+# macOS system files
+.DS_Store
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test coverage reports
+htmlcov/
+.coverage
+.tox/
+.nox/
+.pytest_cache/
+
+# Static files
+staticfiles/
+mediafiles/
+
+# Stubbed data
+stubbed_data/new/complexApiResponse.json
+
+# FastAPI auto-generated files
+*.db
+
+data/

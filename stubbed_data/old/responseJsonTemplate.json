@@ -1,0 +1,20 @@
+{
+  "ollamaFeedback": {
+    "sentences": [
+      {
+        "sentence": "The original sentence from the transcription",
+        "errorCount": 0, 
+        "errors": [
+          {
+            "errorIndex": "index_of_error_in_sentence",
+            "error": "description_of_the_error",
+            "errorType": "type_of_error (e.g., grammar, vocabulary)",
+            "correction": "correction_instructions_to_fix_the_error",
+            "improvedClause": "the_corrected_version_of_the_sentence"
+          }
+        ],
+        "correctedSentence": "the_final_corrected_sentence"
+      }
+    ]
+  }
+}
