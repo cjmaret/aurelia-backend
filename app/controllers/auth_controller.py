@@ -28,13 +28,14 @@ def login_user(userEmail: str, password: str):
 
 
 def register_user(userEmail: str, password: str):
-    user = get_user_by_email(userEmail)
+    normalized_email = userEmail.strip().lower()
+    user = get_user_by_email(normalized_email)
     if user:
         raise HTTPException(status_code=400, detail="email already exists")
 
     # hash token
     hashed_password = hash_password(password)
-    create_user(userEmail, hashed_password)
+    create_user(normalized_email, hashed_password)
     return {"message": "User registered successfully"}
 
 
