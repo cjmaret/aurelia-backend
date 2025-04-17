@@ -58,3 +58,5 @@ stubbed_data/new/complexApiResponse.json
 *.db
 
 data/
+
+stubbed_data/

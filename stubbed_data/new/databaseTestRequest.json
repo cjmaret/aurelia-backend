@@ -1,6 +1,0 @@
-    response = {
-        "sessionId": "xyz789",
-        "createdAt": datetime.utcnow().isoformat() + "Z",
-        "originalText": "text 15.",
-        "sentenceFeedback": []
-    }
