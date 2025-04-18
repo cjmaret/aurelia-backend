@@ -43,10 +43,6 @@ This project serves as the backend for the Conversant-AI frontend.
 4. Set up environment variables:
     Create a .env file in the root directory based on ```.env.template```
 
-5. Start the app:
-  ```uvicorn app.app:app --reload```
-
-
 ## 🖥️ Running the App
 1. Start the backend server:
   ```uvicorn app.app:app --reload```

@@ -6,6 +6,7 @@ from fastapi.encoders import jsonable_encoder
 from app.mongo.MongoClient import get_mongo_client
 from app.mongo.schemas.db_correction_schema import DbCorrection
 from app.mongo.schemas.db_user_schema import DbUserSchema
+from app.schemas.reponse_schemas.correction_response_schema import CorrectionData, CorrectionResponse
 from app.schemas.request_schemas.user_details_request_schema import UserDetailsRequestSchema
 
 
@@ -17,23 +18,31 @@ def get_collection(collection: str):
 
 def store_refresh_token(user_id: str, refresh_token: str):
     users_collection = get_collection("users")
-    users_collection.update_one(
+    result = users_collection.update_one(
         {"userId": user_id},
         {"$set": {"refreshToken": refresh_token}}
     )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found.")
+
 
 def invalidate_refresh_token(user_id: str):
     users_collection = get_collection("users")
-    users_collection.update_one(
+    result = users_collection.update_one(
         {"userId": user_id},
         {"$unset": {"refreshToken": ""}}
-)
+    )
+
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found.")
+
 
 def get_user_by_refresh_token(refresh_token: str):
     users_collection = get_collection("users")
     return users_collection.find_one({"refreshToken": refresh_token})
 
-def get_user_by_email(userEmail: str) -> DbUserSchema | None: 
+
+def get_user_by_email(userEmail: str) -> DbUserSchema | None:
     users_collection = get_collection("users")
 
     return users_collection.find_one({"userEmail": userEmail})
@@ -72,75 +81,114 @@ def get_corrections_by_user_id(user_id: str) -> List[DbCorrection]:
     corrections_collection = get_collection("corrections")
 
     # exclude internal id
-    all_corrections_cursor = corrections_collection.find({"userId": user_id}, {"_id": 0})
+    all_corrections_cursor = corrections_collection.find(
+        {"userId": user_id}, {"_id": 0})
 
     # convert the cursor to a list of dictionaries
     all_corrections = list(all_corrections_cursor)
 
     return all_corrections
 
-def upsert_correction(response: dict, user_id) -> DbCorrection:
 
-    response["userId"] = user_id
+def upsert_correction(response: dict, user_id) -> CorrectionResponse:
+
+    if not response.get("success") or "data" not in response or not response["data"]:
+        return CorrectionResponse(
+            success=False,
+            data=None,
+            error="Invalid response object. Missing required fields."
+        )
+
+    data = response["data"]
 
     corrections_collection = get_collection("corrections")
+
+    data["userId"] = user_id
     created_at_datetime = datetime.strptime(
-        response["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
-    
+        data["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
+
     # check if a recent correction exists in the db
-    existing_data = check_for_recent_correction(user_id,
-        corrections_collection, created_at_datetime)
+    existing_data = check_for_recent_correction(
+        user_id, corrections_collection, created_at_datetime)
 
     if existing_data:
         if existing_data["userId"] != user_id:
-            raise HTTPException(status_code=403, detail="You do not have permission to modify this correction.")
-        
+            raise HTTPException(
+                status_code=403, detail="You do not have permission to modify this correction.")
+
         print(f"Existing data found. Merging data.")
-        return merge_correction(corrections_collection, existing_data, created_at_datetime, response)
+        return merge_correction(corrections_collection, existing_data, created_at_datetime, data)
     else:
         print(
             f"Existing correction not found. Creating new correction.")
-        return create_new_correction(corrections_collection, created_at_datetime, response)
+        return create_new_correction(corrections_collection, created_at_datetime, data)
 
-def create_new_correction(collection, created_at_datetime: datetime, response: dict) -> DbCorrection:
+
+def create_new_correction(collection, created_at_datetime: datetime, data: CorrectionData) -> CorrectionResponse:
+    # check and use only if valid feedback
+    valid_feedback = [
+        feedback for feedback in data["sentenceFeedback"]
+        if "id" in feedback and "original" in feedback and "corrected" in feedback and "errors" in feedback
+    ]
+
     new_correction = DbCorrection(
+        userId=data["userId"],
         conversationId=str(uuid.uuid4()),
         createdAt=created_at_datetime,
-        originalText=response["originalText"],
-        sentenceFeedback=response["sentenceFeedback"],
+        originalText=data["originalText"],
+        sentenceFeedback=valid_feedback,
     )
 
     collection.insert_one(new_correction.dict(by_alias=True))
-    return new_correction
 
-def merge_correction(collection, existing_data: dict, created_at_datetime: datetime, response: dict) -> DbCorrection:
+    return CorrectionResponse(
+        success=True,
+        data=CorrectionData(
+            conversationId=new_correction.conversationId,
+            createdAt=new_correction.createdAt,
+            originalText=new_correction.originalText,
+            sentenceFeedback=valid_feedback
+        ),
+        error=None
+    )
+
+
+def merge_correction(collection, existing_data: dict, created_at_datetime: datetime, data: CorrectionData) -> CorrectionResponse:
+
     if not existing_data:
-        raise KeyError(
-            f"Existing data not found in the database.")
+        return {"success": False, "data": None, "error": "Existing data not found in the database."}
 
-
-    existing_data["originalText"] += " " + response["originalText"]
-    existing_data["sentenceFeedback"].extend(response["sentenceFeedback"])
+    existing_data["originalText"] += " " + data["originalText"]
+    existing_data["sentenceFeedback"].extend(data["sentenceFeedback"])
     existing_data["createdAt"] = created_at_datetime
 
     collection.update_one(
         {"conversationId": existing_data["conversationId"]},
         {"$set": existing_data}
     )
-    
+
     # convert internal id to string for json serialization
     if "_id" in existing_data:
         existing_data["_id"] = str(existing_data["_id"])
 
-    # return updated document in a JSON-serializable format
-    return jsonable_encoder(existing_data)
+    return CorrectionResponse(
+        success=True,
+        data=CorrectionData(
+            conversationId=existing_data["conversationId"],
+            createdAt=existing_data["createdAt"],
+            originalText=existing_data["originalText"],
+            sentenceFeedback=existing_data["sentenceFeedback"],
+        ),
+        error=None
+    )
 
 
 def check_for_recent_correction(user_id: str, collection, created_at_datetime: datetime) -> Optional[DbCorrection]:
+
     # find most recent correction
     most_recent_correction = (
         collection
-        .find({"user_id": user_id})
+        .find({"userId": user_id})
         .sort("createdAt", -1)  # descending order
         .limit(1)
     )

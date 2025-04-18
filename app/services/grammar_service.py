@@ -1,3 +1,5 @@
+import time
+import asyncio
 from datetime import datetime
 import os
 import json
@@ -16,8 +18,12 @@ nlp = load("en_core_web_sm")
 
 def correct_grammar(file, user, target_language: str = None):
 
-    if not user or not hasattr(user, "target_language") or not hasattr(user, "app_language"):
-        return {"error": "Invalid user object"}
+    if not user or "targetLanguage" not in user or "appLanguage" not in user:
+        return {
+            "success": False,
+            "data": None,
+            "error": "Invalid user object"
+        }
 
     file_path = os.path.join(DATA_DIR, file.filename)
 
@@ -26,17 +32,33 @@ def correct_grammar(file, user, target_language: str = None):
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
     except Exception as e:
-        return {"error": f"Failed to save file: {str(e)}"}
+        return {
+            "success": False,
+            "data": None,
+            "error": f"Failed to save file: {str(e)}"
+        }
 
     transcription = format_and_transcribe_audio(file_path)
 
-    target_language = target_language or user.target_language
-    app_language = user.app_language
+    target_language = target_language or user["targetLanguage"]
+    app_language = user["appLanguage"]
 
     # analyze text
     response = analyze_text(transcription, target_language, app_language)
 
-    return response
+
+    if not response.get("sentenceFeedback") or all("error" in feedback for feedback in response["sentenceFeedback"]):
+        return {
+            "success": False,
+            "data": None,
+            "error": "Failed to process transcription. No valid feedback was generated."
+        }
+ 
+    return {
+        "success": True,
+        "data": response,
+        "error": None
+    }
 
 # def identify_language(transcription: str) -> str:
 #     try:
@@ -49,59 +71,71 @@ def correct_grammar(file, user, target_language: str = None):
 def analyze_text(transcription: str, target_language: str, app_language: str):
     if not transcription.strip():
         return {"error": "Transcription is empty"}
-
+    
     chunks = chunk_sentences(transcription)
 
     sentence_feedback = []
     for chunk in chunks:
-        feedback = ollama_analysis(chunk, target_language, app_language)
+        feedback = ollama_analysis_with_retry(
+            chunk, target_language, app_language)
+
         if "error" in feedback:
             print(f"Error in chunk analysis: {feedback['error']}")
             continue
-        sentence_feedback.append(feedback)
+
+        # if feedback is a list, extend instead of append to sentence_feedback
+        if isinstance(feedback, list):
+            sentence_feedback.extend(feedback)  
+        else:
+            sentence_feedback.append(feedback)
 
     return {
         "createdAt": datetime.utcnow().isoformat() + "Z",
         "originalText": transcription,
         "sentenceFeedback": sentence_feedback
     }
+ 
 
-
-def chunk_sentences(text, max_tokens=200):
-    # split sentences at their natural boundaries
+def chunk_sentences(text, max_sentences=5):
     sentences = nltk.sent_tokenize(text)
     chunks = []
-    current_chunk = []
-    current_token_count = 0
 
-    for sentence in sentences:
-        token_count = len(sentence.split())
-        # if adding current sentences exceeds token count, create a new chunk
-        if current_token_count + token_count > max_tokens:
-            chunks.append({
-                "id": str(uuid.uuid4()),
-                "text": " ".join(current_chunk)
-            })
-            # reset current chunk
-            current_chunk = []
-            current_token_count = 0
-
-        current_chunk.append(sentence)
-        current_token_count += token_count
-
-    # add last chunk if it exists
-    if current_chunk:
+    # Loop over sentences, grouping them into chunks of max_sentences
+    for i in range(0, len(sentences), max_sentences):
+        chunk = sentences[i:i+max_sentences]
         chunks.append({
             "id": str(uuid.uuid4()),
-            "text": " ".join(current_chunk)
+            "text": " ".join(chunk)
         })
 
     return chunks
 
 
+def ollama_analysis_with_retry(chunk: dict, target_language: str, app_language: str, retries: int = 3, delay: int = 2):
+    for attempt in range(retries):
+        response = ollama_analysis(chunk, target_language, app_language)
+        if "error" not in response:
+            return response
+        print(f"Retrying Ollama API... Attempt {attempt + 1}/{retries}")
+        time.sleep(delay)
+    return {
+        "error": "Failed to get a valid response from Ollama after multiple attempts.",
+        "id": chunk["id"],
+        "original": chunk["text"],
+        "corrected": None,
+        "errors": []
+    }
+
+
 def ollama_analysis(chunk: dict, target_language: str, app_language: str):
     if not chunk.get("text", "").strip():
-        return {"error": "Chunk text is empty or invalid"}
+        return {
+            "error": "Chunk text is empty or invalid",
+            "id": chunk.get("id", str(uuid.uuid4())),
+            "original": chunk.get("text", ""),
+            "corrected": None,
+            "errors": []
+        }
 
     sentences = nltk.sent_tokenize(chunk["text"])
     sentence_id = chunk["id"]
@@ -114,6 +148,7 @@ def ollama_analysis(chunk: dict, target_language: str, app_language: str):
             "corrected": "the_corrected_version_of_the_sentence",
             "errors": [
                 {
+                    #TODO: ids are getting generated by ollama
                     "id": str(uuid.uuid4()),
                     "error": "description_of_the_error",
                     "reason": "grammatical_reason_for_the_error",
@@ -144,13 +179,32 @@ def ollama_analysis(chunk: dict, target_language: str, app_language: str):
     {chunk["text"]}
     """
 
+    print(f"Prompt for Ollama: {prompt}")
+
     try:
         response = chat_with_ollama(
-            model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free", prompt=prompt)
+            model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free", prompt=prompt
+        )
+
+        print(f"Response from Ollama: {response}")
+        print("\n")
+        print("\n")
         return response
     except json.JSONDecodeError as e:
         print(f"JSON Decode Error: {e}")
-        return {"error": "Ollama returned invalid JSON"}
+        return {
+            "error": "Failed to process transcription due to invalid JSON response from Ollama.",
+            "id": chunk["id"],
+            "original": chunk["text"],
+            "corrected": None,
+            "errors": []
+        }
     except Exception as e:
         print(f"Ollama API Error: {e}")
-        return {"error": f"Ollama API error: {str(e)}"}
+        return {
+            "error": f"An unexpected error occurred while processing the transcription: {str(e)}",
+            "id": chunk["id"],
+            "original": chunk["text"],
+            "corrected": None,
+            "errors": []
+        }

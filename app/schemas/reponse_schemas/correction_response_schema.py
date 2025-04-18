@@ -1,9 +1,9 @@
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
 from datetime import datetime
 
 
-class ErrorResponse(BaseModel):
+class GrammarErrorResponse(BaseModel):
     id: str
     error: str
     reason: str
@@ -15,11 +15,17 @@ class SentenceFeedbackResponse(BaseModel):
     id: str
     original: str
     corrected: str
-    errors: List[ErrorResponse]
+    errors: List[GrammarErrorResponse]
 
 
-class CorrectionResponse(BaseModel):
+class CorrectionData(BaseModel):
     conversationId: str
     createdAt: datetime
     originalText: str
     sentenceFeedback: List[SentenceFeedbackResponse]
+
+
+class CorrectionResponse(BaseModel):
+    success: bool
+    data: Optional[CorrectionData] 
+    error: Optional[str]
