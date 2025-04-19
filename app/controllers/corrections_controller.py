@@ -20,5 +20,5 @@ def add_new_correction(user_id: str, file: UploadFile = File(...)) -> Correction
 
     return correction
 
-def get_corrections(user_id: str):
+def get_corrections(user_id: str) -> CorrectionResponse:
     return get_corrections_by_user_id(user_id)

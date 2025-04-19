@@ -77,17 +77,35 @@ def update_user_details_in_db(user_id: str, userDetails: UserDetailsRequestSchem
     return result.modified_count > 0
 
 
-def get_corrections_by_user_id(user_id: str) -> List[DbCorrection]:
-    corrections_collection = get_collection("corrections")
+def get_corrections_by_user_id(user_id: str) -> CorrectionResponse:
+    try:
+        corrections_collection = get_collection("corrections")
 
-    # exclude internal id
-    all_corrections_cursor = corrections_collection.find(
-        {"userId": user_id}, {"_id": 0})
+        # exclude internal id from response
+        all_corrections_cursor = corrections_collection.find(
+            {"userId": user_id}, {"_id": 0})
 
-    # convert the cursor to a list of dictionaries
-    all_corrections = list(all_corrections_cursor)
+        # convert the cursor to a list of dictionaries
+        all_corrections = list(all_corrections_cursor)
 
-    return all_corrections
+        if not all_corrections:
+            return CorrectionResponse(
+                success=False,
+                data=None,
+                error="No corrections found for the given user ID."
+            )
+
+        return CorrectionResponse(
+            success=True,
+            data=all_corrections,
+            error=None
+        )
+    except Exception as e:
+        return CorrectionResponse(
+            success=False,
+            data=None,
+            error=f"An error occurred while fetching corrections: {str(e)}"
+        )
 
 
 def upsert_correction(response: dict, user_id) -> CorrectionResponse:
@@ -143,12 +161,12 @@ def create_new_correction(collection, created_at_datetime: datetime, data: Corre
 
     return CorrectionResponse(
         success=True,
-        data=CorrectionData(
+        data=[CorrectionData(
             conversationId=new_correction.conversationId,
             createdAt=new_correction.createdAt,
             originalText=new_correction.originalText,
             sentenceFeedback=valid_feedback
-        ),
+        )],
         error=None
     )
 
@@ -173,12 +191,12 @@ def merge_correction(collection, existing_data: dict, created_at_datetime: datet
 
     return CorrectionResponse(
         success=True,
-        data=CorrectionData(
+        data=[CorrectionData(
             conversationId=existing_data["conversationId"],
             createdAt=existing_data["createdAt"],
             originalText=existing_data["originalText"],
             sentenceFeedback=existing_data["sentenceFeedback"],
-        ),
+        )],
         error=None
     )
 

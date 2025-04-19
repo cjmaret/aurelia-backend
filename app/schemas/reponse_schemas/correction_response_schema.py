@@ -27,5 +27,5 @@ class CorrectionData(BaseModel):
 
 class CorrectionResponse(BaseModel):
     success: bool
-    data: Optional[CorrectionData] 
+    data: Optional[List[CorrectionData]] 
     error: Optional[str]
