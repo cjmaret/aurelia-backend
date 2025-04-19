@@ -186,9 +186,6 @@ def ollama_analysis(chunk: dict, target_language: str, app_language: str):
             model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free", prompt=prompt
         )
 
-        print(f"Response from Ollama: {response}")
-        print("\n")
-        print("\n")
         return response
     except json.JSONDecodeError as e:
         print(f"JSON Decode Error: {e}")
