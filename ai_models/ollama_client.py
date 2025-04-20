@@ -32,7 +32,6 @@ def chat_with_ollama(model: str, prompt: str, max_tokens: int = 256):
             return parsed_content
         except json.JSONDecodeError as e:
             print(f"JSONDecodeError: {str(e)}")
-            print(f"Raw content: {content}")
             raise ValueError("The response from the model is not valid JSON.")
     except Exception as e: 
         raise RuntimeError(
