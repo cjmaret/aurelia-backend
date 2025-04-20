@@ -1,5 +1,5 @@
 from typing import List, Union
-from fastapi import APIRouter, Depends, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from app.controllers.corrections_controller import add_new_correction, get_corrections
 from app.schemas.reponse_schemas.correction_response_schema import CorrectionResponse
 from app.utils.auth_utils import get_current_user_from_token

@@ -88,13 +88,6 @@ def get_corrections_by_user_id(user_id: str) -> CorrectionResponse:
         # convert the cursor to a list of dictionaries
         all_corrections = list(all_corrections_cursor)
 
-        if not all_corrections:
-            return CorrectionResponse(
-                success=False,
-                data=None,
-                error="No corrections found for the given user ID."
-            )
-
         return CorrectionResponse(
             success=True,
             data=all_corrections,
@@ -114,7 +107,7 @@ def upsert_correction(response: dict, user_id) -> CorrectionResponse:
         return CorrectionResponse(
             success=False,
             data=None,
-            error="Invalid response object. Missing required fields."
+            error="Invalid response object. Missing required fields"
         )
 
     data = response["data"]
