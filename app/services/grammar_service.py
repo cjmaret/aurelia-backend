@@ -1,22 +1,16 @@
 import time
-import asyncio
 from datetime import datetime
-import os
 import json
 import uuid
 import nltk
 from spacy import load
-# used for file manipulation (copying files)
-import shutil
 from ai_models.ollama_client import chat_with_ollama
-from app.services.transcription_service import format_and_transcribe_audio
-from paths import DATA_DIR
 
 nltk.download('punkt')
 nlp = load("en_core_web_sm")
 
 
-def correct_grammar(file, user, target_language: str = None):
+def correct_grammar(transcription, user, target_language: str = None):
 
     if not user or "targetLanguage" not in user or "appLanguage" not in user:
         return {
@@ -24,21 +18,6 @@ def correct_grammar(file, user, target_language: str = None):
             "data": None,
             "error": "Invalid user object"
         }
-
-    file_path = os.path.join(DATA_DIR, file.filename)
-
-    # save uploaded file
-    try:
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-    except Exception as e:
-        return {
-            "success": False,
-            "data": None,
-            "error": f"Failed to save file: {str(e)}"
-        }
-
-    transcription = format_and_transcribe_audio(file_path)
 
     target_language = target_language or user["targetLanguage"]
     app_language = user["appLanguage"]
@@ -62,6 +41,7 @@ def correct_grammar(file, user, target_language: str = None):
         "data": response,
         "error": None
     }
+
 
 def analyze_text(transcription: str, target_language: str, app_language: str):
     if not transcription.strip():
@@ -121,7 +101,7 @@ def ollama_analysis_with_retry(chunk: list, target_language: str, app_language: 
 
 
 def ollama_analysis(chunk: list, target_language: str, app_language: str):
-    
+
     if not chunk or not any(sentence.strip() for sentence in chunk):
         return {
             "error": "Chunk is empty or contains only invalid sentences",
