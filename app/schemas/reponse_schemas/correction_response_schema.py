@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -25,7 +25,14 @@ class CorrectionData(BaseModel):
     sentenceFeedback: List[SentenceFeedbackResponse]
 
 
+class PaginatedCorrectionsResponse(BaseModel):
+    corrections: List[CorrectionData]
+    total: int
+    page: int
+    limit: int
+
+
 class CorrectionResponse(BaseModel):
     success: bool
-    data: Optional[List[CorrectionData]] 
+    data: Optional[Union[CorrectionData, PaginatedCorrectionsResponse]]
     error: Optional[str]

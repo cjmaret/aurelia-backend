@@ -77,20 +77,32 @@ def update_user_details_in_db(user_id: str, userDetails: UserDetailsRequestSchem
     return result.modified_count > 0
 
 
-def get_corrections_by_user_id(user_id: str) -> CorrectionResponse:
+def get_corrections_by_user_id(user_id: str, page: int, limit: int) -> CorrectionResponse:
     try:
         corrections_collection = get_collection("corrections")
 
-        # exclude internal id from response
-        all_corrections_cursor = corrections_collection.find(
-            {"userId": user_id}, {"_id": 0})
+        # num of documents to skip
+        skip = (page - 1) * limit
 
-        # convert the cursor to a list of dictionaries
-        all_corrections = list(all_corrections_cursor)
+        # fetch with pagination
+        corrections_cursor = corrections_collection.find(
+            {"userId": user_id}, {"_id": 0}
+        ).sort("createdAt", -1).skip(skip).limit(limit)
+
+        # convert cursor to list
+        corrections = list(corrections_cursor)
+
+        total_corrections = corrections_collection.count_documents(
+            {"userId": user_id})
 
         return CorrectionResponse(
             success=True,
-            data=all_corrections,
+            data={
+                "corrections": corrections,
+                "total": total_corrections,
+                "page": page,
+                "limit": limit
+            },
             error=None
         )
     except Exception as e:

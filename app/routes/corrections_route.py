@@ -13,5 +13,9 @@ def add_correction(file: UploadFile = File(...), user_id: str = Depends(get_curr
 
 
 @router.get("/api/v1/corrections", response_model=CorrectionResponse)
-def fetch_corrections(user_id: str = Depends(get_current_user_from_token)):
-    return get_corrections(user_id)
+def fetch_corrections(
+    user_id: str = Depends(get_current_user_from_token),
+    page: int = 1,
+    limit: int = 10
+):
+    return get_corrections(user_id, page, limit)
