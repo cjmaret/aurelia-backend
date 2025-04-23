@@ -34,5 +34,5 @@ class PaginatedCorrectionsResponse(BaseModel):
 
 class CorrectionResponse(BaseModel):
     success: bool
-    data: Optional[Union[CorrectionData, PaginatedCorrectionsResponse]]
+    data: Optional[Union[List[CorrectionData], PaginatedCorrectionsResponse]]
     error: Optional[str]
