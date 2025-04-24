@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import Optional
 import uuid
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
@@ -225,3 +225,47 @@ def check_for_recent_correction(user_id: str, collection, created_at_datetime: d
             return most_recent_correction
 
     return None
+
+
+def search_corrections_in_db(user_id: str, query: str, page: int, limit: int) -> CorrectionResponse:
+    try:
+        corrections_collection = get_collection("corrections")
+
+        skip = (page - 1) * limit
+
+        print(f"Searching for corrections for user {user_id} with query: {query}")
+
+        # text search
+        corrections_cursor = corrections_collection.find(
+            {
+                "userId": user_id,
+                "$text": {"$search": query}
+            },
+            {"_id": 0} 
+        ).skip(skip).limit(limit)
+
+        corrections = list(corrections_cursor)
+
+        total_corrections = corrections_collection.count_documents(
+            {
+                "userId": user_id,
+                "$text": {"$search": query}
+            }
+        )
+
+        return CorrectionResponse(
+            success=True,
+            data={
+                "corrections": corrections,
+                "total": total_corrections,
+                "page": page,
+                "limit": limit
+            },
+            error=None
+        )
+    except Exception as e:
+        return CorrectionResponse(
+            success=False,
+            data=None,
+            error=f"An error occurred while searching corrections: {str(e)}"
+        )

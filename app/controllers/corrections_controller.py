@@ -1,3 +1,4 @@
+from app.services.database_service import search_corrections_in_db
 from fastapi import HTTPException, UploadFile, File
 from app.schemas.reponse_schemas.correction_response_schema import CorrectionResponse
 from app.services.audio_processing_service import format_and_transcribe_audio
@@ -34,3 +35,10 @@ def add_new_correction(user_id: str, file: UploadFile = File(...)) -> Correction
 
 def get_corrections(user_id: str, page: int, limit: int) -> CorrectionResponse:
     return get_corrections_by_user_id(user_id, page, limit)
+
+
+def search_corrections(user_id: str, query: str, page: int, limit: int):
+    if not query.strip(): 
+        return get_corrections_by_user_id(user_id, page, limit)
+    
+    return search_corrections_in_db(user_id, query, page, limit)
