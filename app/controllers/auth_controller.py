@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 import jwt
-from app.services.database_service import get_user_by_email, create_user, get_user_by_refresh_token, store_refresh_token
+from app.services.database_service import get_user_by_email, create_user, get_user_by_id, get_user_by_refresh_token, store_refresh_token, update_user_password_in_db
 from app.utils.auth_utils import ALGORITHM, SECRET_KEY, create_access_token, create_refresh_token, verify_password, hash_password
 
 
@@ -70,6 +70,43 @@ def refresh_user_token(refresh_token: str):
         "refreshToken": new_refresh_token,       
         "tokenType": "bearer"
     }
+
+
+def update_user_password(user_id: str, currentPassword: str, newPassword: str):
+
+    user = get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if not verify_password(currentPassword, user["password"]):
+        raise HTTPException(
+            status_code=403, detail="Current password is incorrect")
+
+    if len(newPassword) < 8:
+        raise HTTPException(
+            status_code=400, detail="Password must be at least 8 characters long")
+
+    if verify_password(newPassword, user["password"]):
+        raise HTTPException(
+            status_code=400, detail="New password cannot be the same as the current password")
+
+    hashed_password = hash_password(newPassword)
+
+    update_result = update_user_password_in_db(user_id, hashed_password)
+
+    print('update_result', update_result)
+
+    # Check if the update was successful
+    if update_result.modified_count == 0:
+        raise HTTPException(
+            status_code=500, detail="Failed to update the password. Please try again later."
+        )
+
+    # Notify the user (e.g., send an email)
+    # send_password_change_notification(user["email"])
+
+    return {"success": True, "message": "Password updated successfully"}
+
 
 
 # TODO: deal with this

@@ -77,6 +77,24 @@ def update_user_details_in_db(user_id: str, userDetails: UserDetailsRequestSchem
     return result.modified_count > 0
 
 
+def update_user_password_in_db(user_id: str, hashed_password: str):
+    users_collection = get_collection("users")
+    print(f"Updating password for user {user_id}")
+    result = users_collection.update_one(
+        {"userId": user_id},
+        {"$set": {"password": hashed_password}}
+    )
+    return result
+
+
+# def send_password_change_notification(email: str):
+#     # Example email sending logic
+#     send_email(
+#         to=email,
+#         subject="Your Password Has Been Changed",
+#         body="Your password was successfully updated. If you did not make this change, please contact support immediately."
+#     )
+
 def get_corrections_by_user_id(user_id: str, page: int, limit: int) -> CorrectionResponse:
     try:
         corrections_collection = get_collection("corrections")
