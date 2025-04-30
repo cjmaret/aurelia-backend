@@ -109,6 +109,16 @@ def ollama_analysis(chunk: list, target_language: str, app_language: str):
             "corrected": None,
             "errors": []
         }
+    
+    LANGUAGE_MAP = {
+            "en": "English",
+            "es": "Spanish",
+            "fr": "French"
+    }
+
+    target_language_full = LANGUAGE_MAP.get(target_language, target_language)
+    app_language_full = LANGUAGE_MAP.get(app_language, app_language)
+    
 
     sentence_templates = []
     for sentence in chunk:
@@ -130,7 +140,7 @@ def ollama_analysis(chunk: list, target_language: str, app_language: str):
 
     # Build the prompt
     prompt = f"""
-    The following transcription is in {target_language}. Analyze the transcription and return the results in this structured JSON format:
+    The following transcription is in {target_language_full}. Analyze the transcription and return the results in this structured JSON format:
     {sentence_templates_json}
 
     For each sentence:
@@ -141,6 +151,8 @@ def ollama_analysis(chunk: list, target_language: str, app_language: str):
        - `suggestion`: How to fix the error.
        - `improvedClause`: The corrected clause.
     3. Provide the `corrected` sentence with all errors fixed.
+
+    Your explanations should be in {app_language_full}.
 
     ### Transcription:
     {chunk}
