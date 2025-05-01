@@ -5,12 +5,13 @@ import uuid
 import nltk
 from spacy import load
 from ai_models.ollama_client import chat_with_ollama
+from app.mongo.schemas.db_user_schema import DbUserSchema
 
 nltk.download('punkt')
 nlp = load("en_core_web_sm")
 
 
-def correct_grammar(transcription, user, target_language: str = None):
+def correct_grammar(transcription, user: DbUserSchema, target_language: str = None):
 
     if not user or "targetLanguage" not in user or "appLanguage" not in user:
         return {
@@ -109,16 +110,15 @@ def ollama_analysis(chunk: list, target_language: str, app_language: str):
             "corrected": None,
             "errors": []
         }
-    
+
     LANGUAGE_MAP = {
-            "en": "English",
-            "es": "Spanish",
-            "fr": "French"
+        "en": "English",
+        "es": "Spanish",
+        "fr": "French"
     }
 
     target_language_full = LANGUAGE_MAP.get(target_language, target_language)
     app_language_full = LANGUAGE_MAP.get(app_language, app_language)
-    
 
     sentence_templates = []
     for sentence in chunk:
@@ -130,7 +130,8 @@ def ollama_analysis(chunk: list, target_language: str, app_language: str):
                     "error": "description_of_the_error",
                     "reason": "grammatical_reason_for_the_error",
                     "suggestion": "suggestion_to_fix_the_error",
-                    "improvedClause": "the_corrected_version_of_the_clause"
+                    "improvedClause": "the_corrected_version_of_the_clause",
+                    "type": "type_of_error" 
                 }
             ]
         })
@@ -140,7 +141,11 @@ def ollama_analysis(chunk: list, target_language: str, app_language: str):
 
     # Build the prompt
     prompt = f"""
-    The following transcription is in {target_language_full}. Analyze the transcription and return the results in this structured JSON format:
+    The following transcription is in {target_language_full}. It represents spoken language, not written text. Focus only on correcting grammar, word choice, and clarity. Do not correct punctuation, capitalization, or any other aspects of written formatting, even if they appear incorrect. Ignore punctuation-related issues such as missing commas, periods, or quotation marks. Do not classify punctuation-related issues as grammar errors.
+
+    A sentence may have no errors at all. If there are no errors in a sentence, return an empty `errors` array for that sentence.
+
+    Analyze the transcription and return the results in this structured JSON format:
     {sentence_templates_json}
 
     For each sentence:
@@ -150,6 +155,7 @@ def ollama_analysis(chunk: list, target_language: str, app_language: str):
        - `reason`: The grammatical reason for the error.
        - `suggestion`: How to fix the error.
        - `improvedClause`: The corrected clause.
+       - `type`: The type of error (e.g., "grammar", "word choice", "pronunciation", "spelling", "punctuation", "capitalization").
     3. Provide the `corrected` sentence with all errors fixed.
 
     Your explanations should be in {app_language_full}.

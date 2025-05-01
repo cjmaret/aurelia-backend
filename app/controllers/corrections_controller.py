@@ -13,7 +13,7 @@ def add_new_correction(user_id: str, file: UploadFile = File(...)) -> Correction
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        transcription = format_and_transcribe_audio(file)
+        transcription = format_and_transcribe_audio(file, user)
 
         response = correct_grammar(transcription, user)
         if not response["success"]:

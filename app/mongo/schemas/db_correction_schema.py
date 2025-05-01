@@ -9,6 +9,7 @@ class DbError(BaseModel):
     reason: str
     suggestion: str
     improvedClause: str
+    type: str
 
 
 class DbSentenceFeedback(BaseModel):

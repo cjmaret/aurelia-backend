@@ -1,6 +1,7 @@
 import os
 # used for file manipulation (copying files)
 import shutil
+from app.mongo.schemas.db_user_schema import DbUserSchema
 from paths import DATA_DIR
 
 from ai_models.whisper_model import whisper_model
@@ -8,7 +9,7 @@ from ai_models.whisper_model import whisper_model
 from pydub import AudioSegment
 
 
-def format_and_transcribe_audio(file):
+def format_and_transcribe_audio(file, user: DbUserSchema):
 
     file_path = os.path.join(DATA_DIR, file.filename)
 
@@ -25,9 +26,11 @@ def format_and_transcribe_audio(file):
 
     # convert to WAV
     wav_path = clean_audio(file_path)
+    
+    target_language = user["targetLanguage"]
 
     # transcribe
-    transcription = whisper_model.transcribe(wav_path)
+    transcription = whisper_model.transcribe(wav_path, target_language)
     if not transcription.strip():
         raise ValueError("No speech detected in the audio file.")
 
