@@ -1,4 +1,4 @@
-from app.services.database_service import search_corrections_in_db
+from app.services.database_service import delete_correction_by_id, search_corrections_in_db
 from fastapi import HTTPException, UploadFile, File
 from app.schemas.reponse_schemas.correction_response_schema import CorrectionResponse
 from app.services.audio_processing_service import format_and_transcribe_audio
@@ -42,3 +42,10 @@ def search_corrections(user_id: str, query: str, page: int, limit: int):
         return get_corrections_by_user_id(user_id, page, limit)
     
     return search_corrections_in_db(user_id, query, page, limit)
+
+
+def delete_correction(conversationId: str):
+    success = delete_correction_by_id(conversationId)
+    if not success:
+        raise HTTPException(status_code=404, detail="Correction not found")
+    return {"success": True, "message": "Correction deleted successfully"}

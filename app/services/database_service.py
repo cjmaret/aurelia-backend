@@ -287,3 +287,11 @@ def search_corrections_in_db(user_id: str, query: str, page: int, limit: int) ->
             data=None,
             error=f"An error occurred while searching corrections: {str(e)}"
         )
+
+
+def delete_correction_by_id(conversationId: str) -> bool:
+    print(f"Deleting correction with conversationId: {conversationId}")
+    corrections_collection = get_collection("corrections")
+    result = corrections_collection.delete_one(
+        {"conversationId": conversationId})
+    return result.deleted_count > 0
