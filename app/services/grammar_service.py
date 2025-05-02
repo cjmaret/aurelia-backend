@@ -3,13 +3,10 @@ from datetime import datetime
 import json
 import uuid
 import nltk
-from spacy import load
 from ai_models.ollama_client import chat_with_ollama
 from app.mongo.schemas.db_user_schema import DbUserSchema
 
 nltk.download('punkt')
-nlp = load("en_core_web_sm")
-
 
 def correct_grammar(transcription, user: DbUserSchema, target_language: str = None):
 
