@@ -1,10 +1,12 @@
 import os
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path=".env.development")
+if os.path.exists(".env.development"):
+    load_dotenv(dotenv_path=".env.development")
 
 class Config:
     ENV = os.getenv("ENV", "production")
+    MONGO_URI = os.getenv("MONGO_URI")
     TOGETHER_API_KEY = os.getenv("TOGETHER_API_KEY")
     SECRET_KEY = os.getenv("SECRET_KEY")
     ALGORITHM = os.getenv("ALGORITHM", "HS256")

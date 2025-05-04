@@ -1,6 +1,7 @@
 from pymongo import MongoClient
-
+from app.config import Config
 
 def get_mongo_client():
-    client = MongoClient("mongodb://localhost:27017/")
+    mongo_uri = Config.MONGO_URI
+    client = MongoClient(mongo_uri)
     return client
