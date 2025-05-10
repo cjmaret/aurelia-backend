@@ -1,34 +1,12 @@
-import logging
 import os
 # used for file manipulation (copying files)
-import platform
 import shutil
+# handles audio file conversion and manipulation
 import subprocess
 from app.mongo.schemas.db_user_schema import DbUserSchema
 from paths import DATA_DIR
 
 from ai_models.whisper_model import whisper_model
-# handles audio file conversion and manipulation
-from pydub import AudioSegment
-
-logger = logging.getLogger(__name__)
-
-
-if platform.system() == "Darwin":  # mac
-    pass
-elif platform.system() == "Linux":  # digitalocean)
-    AudioSegment.converter = os.path.join("bin", "ffmpeg")
-    AudioSegment.ffprobe = os.path.join("bin", "ffprobe")
-else:
-    raise EnvironmentError(
-        "Unsupported platform. Only macOS and Linux are supported.")
-
-
-logger.info(f"platform.system() = {platform.system()}")
-if hasattr(AudioSegment, "converter") and AudioSegment.converter:
-    logger.info(f"AudioSegment.converter = {AudioSegment.converter}")
-if hasattr(AudioSegment, "ffprobe") and AudioSegment.ffprobe:
-    logger.info(f"AudioSegment.ffprobe = {AudioSegment.ffprobe}")
 
 
 def format_and_transcribe_audio(file, user: DbUserSchema):
@@ -65,8 +43,6 @@ def clean_audio(input_path: str) -> str:
     return output_path
 
 # wav is commonly used for audio processing because its uncompressed
-
-
 def convert_to_wav(input_path: str, output_path: str):
     try:
         # Use ffmpeg to convert the audio file to WAV
