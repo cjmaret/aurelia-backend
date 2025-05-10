@@ -1,7 +1,9 @@
+import logging
 import os
 # used for file manipulation (copying files)
 import platform
 import shutil
+import subprocess
 from app.mongo.schemas.db_user_schema import DbUserSchema
 from paths import DATA_DIR
 
@@ -9,14 +11,25 @@ from ai_models.whisper_model import whisper_model
 # handles audio file conversion and manipulation
 from pydub import AudioSegment
 
-if platform.system() == "Darwin":  # macOS
+logger = logging.getLogger(__name__)
+
+
+if platform.system() == "Darwin":  # mac
     pass
-elif platform.system() == "Linux":  # DigitalOcean (Linux)
-    AudioSegment.converter = os.path.join("bin", "ffmpeg-linux")
-    AudioSegment.ffprobe = os.path.join("bin", "ffprobe-linux")
+elif platform.system() == "Linux":  # digitalocean)
+    AudioSegment.converter = os.path.join("bin", "ffmpeg")
+    AudioSegment.ffprobe = os.path.join("bin", "ffprobe")
 else:
     raise EnvironmentError(
         "Unsupported platform. Only macOS and Linux are supported.")
+
+
+logger.info(f"platform.system() = {platform.system()}")
+if hasattr(AudioSegment, "converter") and AudioSegment.converter:
+    logger.info(f"AudioSegment.converter = {AudioSegment.converter}")
+if hasattr(AudioSegment, "ffprobe") and AudioSegment.ffprobe:
+    logger.info(f"AudioSegment.ffprobe = {AudioSegment.ffprobe}")
+
 
 def format_and_transcribe_audio(file, user: DbUserSchema):
 
@@ -55,10 +68,21 @@ def clean_audio(input_path: str) -> str:
 
 
 def convert_to_wav(input_path: str, output_path: str):
-    audio = AudioSegment.from_file(input_path)
-    audio = audio.set_channels(1).set_frame_rate(
-        16000)  # mono, 16khz (standard format)
-    audio.export(output_path, format="wav")
+    try:
+        # Use ffmpeg to convert the audio file to WAV
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-y",              # Automatically overwrite the output file
+                "-i", input_path,  # Input file
+                "-ac", "1",        # Mono audio
+                "-ar", "16000",    # 16kHz sample rate
+                output_path        # Output file
+            ],
+            check=True
+        )
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(f"Failed to convert audio: {e}")
 
 
 def transcribe(wav_path: str) -> str:
