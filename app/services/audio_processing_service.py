@@ -1,5 +1,6 @@
 import os
 # used for file manipulation (copying files)
+import platform
 import shutil
 from app.mongo.schemas.db_user_schema import DbUserSchema
 from paths import DATA_DIR
@@ -8,6 +9,14 @@ from ai_models.whisper_model import whisper_model
 # handles audio file conversion and manipulation
 from pydub import AudioSegment
 
+if platform.system() == "Darwin":  # macOS
+    pass
+elif platform.system() == "Linux":  # DigitalOcean (Linux)
+    AudioSegment.converter = os.path.join("bin", "ffmpeg-linux")
+    AudioSegment.ffprobe = os.path.join("bin", "ffprobe-linux")
+else:
+    raise EnvironmentError(
+        "Unsupported platform. Only macOS and Linux are supported.")
 
 def format_and_transcribe_audio(file, user: DbUserSchema):
 
