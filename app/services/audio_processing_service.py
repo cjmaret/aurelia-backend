@@ -1,3 +1,4 @@
+import traceback
 import logging
 import os
 # handles audio file conversion and manipulation
@@ -53,11 +54,12 @@ def clean_audio(input_path: str) -> str:
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+
 def convert_to_wav(input_path: str, output_path: str):
     try:
         logger.info(
             f"Converting audio: input_path={input_path}, output_path={output_path}")
-        
+
         if not os.path.exists(input_path):
             raise FileNotFoundError(f"Input file does not exist: {input_path}")
         logger.info(f"Input file exists: {input_path}")
@@ -90,11 +92,10 @@ def convert_to_wav(input_path: str, output_path: str):
         # Write the output WAV file
         sf.write(output_path, data, 16000, format='WAV', subtype='PCM_16')
         logger.info(f"Audio successfully converted to WAV: {output_path}")
-        print(f"Audio successfully converted to WAV: {output_path}")
     except Exception as e:
         logger.error(f"Error in convert_to_wav: {e}")
+        logger.error(traceback.format_exc())  # Log the full traceback
         raise RuntimeError(f"Failed to convert audio: {e}")
-
-
+    
 def transcribe(wav_path: str) -> str:
     return whisper_model.transcribe(wav_path)
