@@ -51,6 +51,7 @@ def clean_audio(input_path: str) -> str:
 
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 def convert_to_wav(input_path: str, output_path: str):
     try:

@@ -1,3 +1,4 @@
+import logging
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,6 +9,12 @@ from app.routes.user_route import router as user_router
 from app.routes.corrections_route import router as corrections_router
 
 app = FastAPI()
+
+logging.basicConfig(
+    level=logging.INFO,  # Set the logging level to INFO
+    format="%(asctime)s [%(levelname)s] %(message)s",  # Log format
+    datefmt="%Y-%m-%d %H:%M:%S",  # Date format
+)
  
 # middleware required for authlib (Google OAuth)
 app.add_middleware(
