@@ -13,7 +13,9 @@ from pydub import AudioSegment
 import soundfile as sf
 import audioread
 import wave
+import nltk
 
+nltk.download("punkt")
 
 
 from ai_models.whisper_model import whisper_model
