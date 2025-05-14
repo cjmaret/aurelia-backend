@@ -16,6 +16,7 @@ import wave
 import nltk
 
 nltk.download("punkt")
+nltk.download("punkt_tab")
 
 
 from ai_models.whisper_model import whisper_model
