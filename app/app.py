@@ -46,10 +46,3 @@ def home():
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(corrections_router)
-
-if __name__ == "__main__":
-    import uvicorn
-
-    # Get the PORT from the environment variable, default to 8000 if not set
-    port = int(os.getenv("PORT", 8000))
-    uvicorn.run("app.app:app", host="0.0.0.0", port=port, reload=True)
