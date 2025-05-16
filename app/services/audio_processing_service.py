@@ -1,18 +1,11 @@
-import traceback
 import logging
 import os
-# handles audio file conversion and manipulation
-import numpy as np
-from scipy.signal import resample
-import audioread
 # used for file manipulation (copying files)
 import shutil
 from app.mongo.schemas.db_user_schema import DbUserSchema
 from paths import DATA_DIR
+# handles audio file conversion and manipulation
 from pydub import AudioSegment
-import soundfile as sf
-import audioread
-import wave
 import nltk
 
 nltk.download("punkt")
