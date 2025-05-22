@@ -7,15 +7,19 @@ from paths import DATA_DIR
 # handles audio file conversion and manipulation
 from pydub import AudioSegment
 import nltk
+from ai_models.whisper_model import whisper_model
 
 nltk.download("punkt")
 nltk.download("punkt_tab")
 
 
-from ai_models.whisper_model import whisper_model
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def format_and_transcribe_audio(file, user: DbUserSchema):
+
+    print(f"Received file: {file.filename}")
 
     file_path = os.path.join(DATA_DIR, file.filename)
 
@@ -30,8 +34,11 @@ def format_and_transcribe_audio(file, user: DbUserSchema):
             "error": f"Failed to save file: {str(e)}"
         }
 
+    print(f"File saved to: {file_path}")
     # convert to WAV
     wav_path = clean_audio(file_path)
+
+    print(f"Converted to WAV: {wav_path}")
     
     target_language = user["targetLanguage"]
 
@@ -44,22 +51,22 @@ def format_and_transcribe_audio(file, user: DbUserSchema):
 
 
 def clean_audio(input_path: str) -> str:
+    print(f"Cleaning audio file: {input_path}")
     output_path = input_path.replace(".mp3", ".wav").replace(".m4a", ".wav")
     convert_to_wav(input_path, output_path)
+    print(f"Converted audio file saved to: {output_path}")
     return output_path
 
 # wav is commonly used for audio processing because its uncompressed
-
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
-
 def convert_to_wav(input_path: str, output_path: str):
+    print(f"Converting audio file to WAV: {input_path} -> {output_path}")
     audio = AudioSegment.from_file(input_path)
     audio = audio.set_channels(1).set_frame_rate(
         16000)  # mono, 16khz (standard format)
     audio.export(output_path, format="wav")
 
 def transcribe(wav_path: str) -> str:
-    return whisper_model.transcribe(wav_path)
+    print(f"Transcribing audio file: {wav_path}")
+    thing = whisper_model.transcribe(wav_path)
+    print(f"Transcription result: {thing}")
+    return thing
