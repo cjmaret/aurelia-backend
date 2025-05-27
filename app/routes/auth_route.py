@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from app.config import Config
-from app.controllers.auth_controller import login_user, process_google_user, refresh_user_token, register_user, update_user_password
+from app.controllers.auth_controller import login_user, process_google_user, refresh_user_token, register_user, update_user_password, delete_user
 from app.schemas.request_schemas.refresh_token_request_schema import RefreshTokenRequest
 from app.schemas.request_schemas.update_password_request_schema import UpdatePasswordRequest
 from app.services.oauth_service import oauth
@@ -20,10 +20,15 @@ def login(request: LoginRequest):
 def register(request: RegisterRequest):
     return register_user(request.userEmail, request.password)
 
+@router.delete("/delete-user")
+def delete_user_account(
+    user_id: str = Depends(get_current_user_from_token)
+):
+    return delete_user(user_id)
+
 @router.post("/auth/refresh")
 def refresh_token(request: RefreshTokenRequest):
     return refresh_user_token(request.refreshToken)
-
 
 @router.post("/auth/update-password")
 def update_password(

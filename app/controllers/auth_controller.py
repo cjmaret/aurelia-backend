@@ -1,3 +1,4 @@
+from app.services.database_service import delete_corrections_by_user_id, delete_user_by_id
 from fastapi import HTTPException
 import jwt
 from app.services.database_service import get_user_by_email, create_user, get_user_by_id, get_user_by_refresh_token, store_refresh_token, update_user_password_in_db
@@ -37,6 +38,21 @@ def register_user(userEmail: str, password: str):
     hashed_password = hash_password(password)
     create_user(normalized_email, hashed_password)
     return {"message": "User registered successfully"}
+
+
+def delete_user(user_id: str):
+    user = get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    delete_corrections_by_user_id(user_id)
+
+    delete_result = delete_user_by_id(user_id)
+    if not delete_result:
+        raise HTTPException(
+            status_code=500, detail="Failed to delete user account")
+
+    return {"success": True, "message": "User account deleted successfully"}
 
 
 def refresh_user_token(refresh_token: str):

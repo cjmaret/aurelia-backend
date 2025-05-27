@@ -62,6 +62,12 @@ def create_user(userEmail: str, hashed_password: str) -> None:
     users_collection.insert_one(new_user.dict())
 
 
+def delete_user_by_id(user_id: str) -> bool:
+    users_collection = get_collection("users")
+    result = users_collection.delete_one({"userId": user_id})
+    return result.deleted_count > 0
+
+
 def get_user_by_id(user_id: str) -> DbUserSchema | None:
     users_collection = get_collection("users")
     return users_collection.find_one({"userId": user_id})
@@ -251,7 +257,8 @@ def search_corrections_in_db(user_id: str, query: str, page: int, limit: int) ->
 
         skip = (page - 1) * limit
 
-        print(f"Searching for corrections for user {user_id} with query: {query}")
+        print(
+            f"Searching for corrections for user {user_id} with query: {query}")
 
         # text search
         corrections_cursor = corrections_collection.find(
@@ -259,7 +266,7 @@ def search_corrections_in_db(user_id: str, query: str, page: int, limit: int) ->
                 "userId": user_id,
                 "$text": {"$search": query}
             },
-            {"_id": 0} 
+            {"_id": 0}
         ).skip(skip).limit(limit)
 
         corrections = list(corrections_cursor)
@@ -295,3 +302,9 @@ def delete_correction_by_id(conversationId: str) -> bool:
     result = corrections_collection.delete_one(
         {"conversationId": conversationId})
     return result.deleted_count > 0
+
+
+def delete_corrections_by_user_id(user_id: str) -> int:
+    corrections_collection = get_collection("corrections")
+    result = corrections_collection.delete_many({"userId": user_id})
+    return result.deleted_count
