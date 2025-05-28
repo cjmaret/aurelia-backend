@@ -41,7 +41,7 @@ app.add_middleware(
 # home route
 @app.get("/")
 def home():
-    return {"message": "Conversant API is running"}
+    return {"message": "Aurelia API is running"}
 
 app.include_router(auth_router)
 app.include_router(user_router)
