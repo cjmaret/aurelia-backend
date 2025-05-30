@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from app.config import Config
-from app.controllers.auth_controller import login_user, process_google_user, refresh_user_token, register_user, request_password_reset, update_user_password, delete_user
+from app.controllers.auth_controller import login_user, process_google_user, refresh_user_token, register_user, request_password_reset, reset_password, update_user_password, delete_user
 from app.schemas.request_schemas.refresh_token_request_schema import RefreshTokenRequest
 from app.schemas.request_schemas.request_password_reset_request_schema import RequestPasswordResetRequest
 from app.schemas.request_schemas.update_password_request_schema import UpdatePasswordRequest
+from app.schemas.reset_password_request_schema import ResetPasswordRequest
 from app.services.oauth_service import oauth
 from app.schemas.request_schemas.login_request_schema import LoginRequest
 from app.schemas.request_schemas.register_request_schema import RegisterRequest
@@ -43,6 +44,10 @@ def update_password(
 def request_password_reset_endpoint(request: RequestPasswordResetRequest):
     return request_password_reset(request.userEmail)
 
+
+@router.post("/auth/reset-password")
+def reset_password_endpoint(request: ResetPasswordRequest):
+    return reset_password(request.token, request.newPassword)
 
 
 

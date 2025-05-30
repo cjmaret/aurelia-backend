@@ -1,9 +1,31 @@
-from datetime import datetime
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-
 from app.config import Config
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import smtplib
+from datetime import datetime
+
+def send_password_change_notification(userEmail: str):
+    send_email(
+        to=userEmail,
+        subject="Your Password Has Been Changed",
+        title="Aurelia Notification",
+        body="Your password was successfully updated. If you did not make this change, please contact support immediately.",
+        button_text="Contact Support",
+        button_link="mailto:contactaurelialabs@gmail.com",
+    )
+
+
+def send_password_reset_email(userEmail: str, reset_token: str):
+    reset_link = f"{Config.PASSWORD_RESET_LINK}/reset-password?token={reset_token}"
+
+    send_email(
+        to=userEmail,
+        subject="Reset Your Password",
+        title="Reset Your Password",
+        body="You requested a password reset. Click the button below to reset your password. This link will expire in 30 minutes.",
+        button_text="Reset Password",
+        button_link=reset_link,
+    )
 
 
 def send_email(
