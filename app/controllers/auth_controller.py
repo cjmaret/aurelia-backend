@@ -3,6 +3,7 @@ from fastapi import HTTPException
 import jwt
 from app.services.database_service import get_user_by_email, create_user, get_user_by_id, get_user_by_refresh_token, store_refresh_token, update_user_password_in_db
 from app.utils.auth_utils import ALGORITHM, SECRET_KEY, create_access_token, create_refresh_token, verify_password, hash_password
+from app.utils.email_utils import send_email
 
 
 def login_user(userEmail: str, password: str):
@@ -118,11 +119,18 @@ def update_user_password(user_id: str, currentPassword: str, newPassword: str):
             status_code=500, detail="Failed to update the password. Please try again later."
         )
 
-    # Notify the user (e.g., send an email)
-    # send_password_change_notification(user["email"])
+    # notify user about password change
+    send_password_change_notification(user["userEmail"])
 
     return {"success": True, "message": "Password updated successfully"}
 
+
+def send_password_change_notification(email: str):
+    send_email(
+        to=email,
+        subject="Your Password Has Been Changed",
+        body="Your password was successfully updated. If you did not make this change, please contact support immediately."
+    )
 
 
 # TODO: deal with this

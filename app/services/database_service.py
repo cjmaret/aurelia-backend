@@ -92,15 +92,6 @@ def update_user_password_in_db(user_id: str, hashed_password: str):
     )
     return result
 
-
-# def send_password_change_notification(email: str):
-#     # Example email sending logic
-#     send_email(
-#         to=email,
-#         subject="Your Password Has Been Changed",
-#         body="Your password was successfully updated. If you did not make this change, please contact support immediately."
-#     )
-
 def get_corrections_by_user_id(user_id: str, page: int, limit: int) -> CorrectionResponse:
     try:
         corrections_collection = get_collection("corrections")
