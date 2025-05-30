@@ -2,7 +2,7 @@ from app.services.database_service import delete_corrections_by_user_id, delete_
 from fastapi import HTTPException
 import jwt
 from app.services.database_service import get_user_by_email, create_user, get_user_by_id, get_user_by_refresh_token, store_refresh_token, update_user_password_in_db
-from app.utils.auth_utils import ALGORITHM, SECRET_KEY, create_access_token, create_refresh_token, verify_password, hash_password
+from app.utils.auth_utils import ALGORITHM, SECRET_KEY, create_access_token, create_password_reset_token, create_refresh_token, verify_password, hash_password
 from app.utils.email_utils import send_email
 
 
@@ -111,8 +111,6 @@ def update_user_password(user_id: str, currentPassword: str, newPassword: str):
 
     update_result = update_user_password_in_db(user_id, hashed_password)
 
-    print('update_result', update_result)
-
     # Check if the update was successful
     if update_result.modified_count == 0:
         raise HTTPException(
@@ -125,12 +123,42 @@ def update_user_password(user_id: str, currentPassword: str, newPassword: str):
     return {"success": True, "message": "Password updated successfully"}
 
 
-def send_password_change_notification(email: str):
+def request_password_reset(userEmail: str):
+    user = get_user_by_email(userEmail)
+    if not user:
+        return {"success": True, "message": "If this email is registered, a reset link has been sent."}
+    
+    reset_token = create_password_reset_token(user["userId"])
+
+    send_password_reset_email(userEmail, reset_token)
+
+    return {"success": True, "message": "If this email is registered, a reset link has been sent."}
+
+
+
+# move both below to an email_service.py
+def send_password_change_notification(userEmail: str):
     send_email(
-        to=email,
+        to=userEmail,
         subject="Your Password Has Been Changed",
-        body="Your password was successfully updated. If you did not make this change, please contact support immediately."
+        title="Aurelia Notification",
+        body="Your password was successfully updated. If you did not make this change, please contact support immediately.",
+        button_text="Contact Support",
+        button_link="mailto:contactaurelialabs@gmail.com",
     )
+
+
+def send_password_reset_email(userEmail: str, reset_token: str):
+    reset_link = f"https://yourdomain.com/reset-password?token={reset_token}"
+
+    send_email( 
+        to=userEmail,
+    subject="Reset Your Password",
+    title="Reset Your Password",
+    body="You requested a password reset. Click the button below to reset your password. This link will expire in 30 minutes.",
+    button_text="Reset Password",
+    button_link=reset_link,
+)
 
 
 # TODO: deal with this
