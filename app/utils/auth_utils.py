@@ -7,9 +7,9 @@ from app.config import Config
 
 SECRET_KEY = Config.SECRET_KEY
 ALGORITHM = Config.ALGORITHM
-#TODO: fix refresh token issue
-ACCESS_TOKEN_EXPIRE_MINUTES = 500
-REFRESH_TOKEN_EXPIRE_DAYS = 7
+
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
+REFRESH_TOKEN_EXPIRE_DAYS = 30
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
  
