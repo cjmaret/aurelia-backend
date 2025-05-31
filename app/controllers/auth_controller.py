@@ -130,8 +130,6 @@ def request_password_reset(userEmail: str):
     
     reset_token = create_password_reset_token(user["userId"])
 
-    print(f"Reset token for {userEmail}: {reset_token}")
-
     send_password_reset_email(userEmail, reset_token)
 
     return {"success": True, "message": "If this email is registered, a reset link has been sent."}
