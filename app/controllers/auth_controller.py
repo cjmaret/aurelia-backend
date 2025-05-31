@@ -8,6 +8,11 @@ from app.utils.auth_utils import ALGORITHM, SECRET_KEY, create_access_token, cre
 
 
 def login_user(userEmail: str, password: str):
+    if not userEmail or not password:
+        raise HTTPException(
+            status_code=400, detail="Email and password are required"
+        )
+    
     # get user from database
     user = get_user_by_email(userEmail)
     if not user or not verify_password(password, user["password"]):
