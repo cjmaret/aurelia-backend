@@ -38,6 +38,9 @@ def format_and_transcribe_audio(file, user: DbUserSchema):
     # convert to WAV
     wav_path = clean_audio(file_path)
 
+    if is_silent(wav_path):
+        raise ValueError("No speech detected in the audio file (silence).")
+
     print(f"Converted to WAV: {wav_path}")
     
     target_language = user["targetLanguage"]
@@ -64,6 +67,12 @@ def convert_to_wav(input_path: str, output_path: str):
     audio = audio.set_channels(1).set_frame_rate(
         16000)  # mono, 16khz (standard format)
     audio.export(output_path, format="wav")
+
+
+def is_silent(wav_path: str, silence_thresh: float = -40.0) -> bool:
+    audio = AudioSegment.from_file(wav_path)
+    print(f"Is audio silent?: {audio.dBFS < silence_thresh}")
+    return audio.dBFS < silence_thresh
 
 def transcribe(wav_path: str) -> str:
     print(f"Transcribing audio file: {wav_path}")

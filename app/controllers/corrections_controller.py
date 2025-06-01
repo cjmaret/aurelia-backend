@@ -19,6 +19,8 @@ def add_new_correction(user_id: str, file: UploadFile = File(...)) -> Correction
         logger.info("User found, starting transcription")
         transcription = format_and_transcribe_audio(file, user)
 
+        print(f"Transcription result: {transcription}")
+
         logger.info("Transcription completed, starting grammar correction")
         response = correct_grammar(transcription, user)
         if not response["success"]:
