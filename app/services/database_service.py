@@ -54,8 +54,8 @@ def create_user(userEmail: str, hashed_password: str) -> None:
         userId=str(uuid.uuid4()),
         userEmail=userEmail,
         username="New User",
-        targetLanguage="English",
-        appLanguage="English",
+        targetLanguage="en",
+        appLanguage="en",
         createdAt=datetime.utcnow(),
         password=hashed_password,
     )
@@ -258,7 +258,7 @@ def search_corrections_in_db(user_id: str, query: str, page: int, limit: int) ->
                 "$text": {"$search": query}
             },
             {"_id": 0}
-        ).skip(skip).limit(limit)
+        ).sort("createdAt", -1).skip(skip).limit(limit)
 
         corrections = list(corrections_cursor)
 
