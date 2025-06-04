@@ -59,12 +59,12 @@ def update_password(
 
 
 @router.post("/auth/request-password-reset")
-def request_password_reset_endpoint(request: RequestPasswordResetRequest):
+def request_password_reset_route(request: RequestPasswordResetRequest):
     return request_password_reset(request.userEmail)
 
 
 @router.post("/auth/reset-password")
-def reset_password_endpoint(request: ResetPasswordRequest):
+def reset_password_route(request: ResetPasswordRequest):
     return reset_password(request.token, request.newPassword)
 
 # user first clicks to sign in with google
@@ -80,7 +80,6 @@ async def login_with_google(request: Request):
 
 @router.get("/auth/callback/google")
 async def google_callback(request: Request):
-    print("whatsup amigo")
     try:
         token = await oauth.google.authorize_access_token(request)
         user_info = token.get("userinfo")  # retrieve user info from the token

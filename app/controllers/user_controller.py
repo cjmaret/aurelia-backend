@@ -23,11 +23,11 @@ def get_user_details(user_id: str):
     )
 
 
-def update_user_details(user_id: str, userDetails: UserDetailsRequestSchema):
+def update_user_details(user_id: str, user_details: UserDetailsRequestSchema):
     # convert pydantic model to dictionary
-    userDetails_dict = userDetails.dict(exclude_unset=True)
+    user_details_dict = user_details.dict(exclude_unset=True)
 
-    updated = update_user_details_in_db(user_id, userDetails_dict)
+    updated = update_user_details_in_db(user_id, user_details_dict)
     if not updated:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -49,12 +49,14 @@ def update_user_details(user_id: str, userDetails: UserDetailsRequestSchema):
 
 
 def request_email_change(user_id: str, new_email: str):
-    if get_user_by_email(new_email):
+
+    normalized_email = new_email.strip().lower()
+    if get_user_by_email(normalized_email):
         raise HTTPException(status_code=400, detail="Email already in use")
 
-    token = create_email_verification_token(user_id, new_email)
+    token = create_email_verification_token(user_id, normalized_email)
 
-    send_change_email_verification(new_email, token)
+    send_change_email_verification(normalized_email, token)
 
     return {"success": True, "message": "Verification email sent to new address. Please verify to complete the change."}
 

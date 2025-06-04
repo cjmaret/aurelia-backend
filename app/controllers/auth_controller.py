@@ -7,14 +7,15 @@ from app.services.database_service import get_user_by_email, create_user, get_us
 from app.utils.auth_utils import ALGORITHM, SECRET_KEY, create_access_token, create_password_reset_token, create_refresh_token, verify_password, hash_password
 
 
-def login_user(userEmail: str, password: str):
-    if not userEmail or not password:
+def login_user(user_email: str, password: str):
+    if not user_email or not password:
         raise HTTPException(
             status_code=400, detail="Email and password are required"
         )
 
+    print(f"Attempting to log in user with email: {user_email}")
     # get user from database
-    user = get_user_by_email(userEmail)
+    user = get_user_by_email(user_email)
     if not user or not verify_password(password, user["password"]):
         raise HTTPException(
             status_code=401, detail="Invalid email or password"
@@ -35,15 +36,14 @@ def login_user(userEmail: str, password: str):
     }
 
 
-def register_user(userEmail: str, password: str):
-    normalized_email = userEmail.strip().lower()
-    user = get_user_by_email(normalized_email)
+def register_user(user_email: str, password: str):
+    user = get_user_by_email(user_email)
     if user:
         raise HTTPException(status_code=400, detail="email already exists")
 
     # hash token
     hashed_password = hash_password(password)
-    create_user(normalized_email, hashed_password)
+    create_user(user_email, hashed_password)
     return {"message": "User registered successfully"}
 
 
@@ -116,25 +116,25 @@ def refresh_user_token(refresh_token: str):
     }
 
 
-def update_user_password(user_id: str, currentPassword: str, newPassword: str):
+def update_user_password(user_id: str, current_password: str, new_password: str):
 
     user = get_user_by_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    if not verify_password(currentPassword, user["password"]):
+    if not verify_password(current_password, user["password"]):
         raise HTTPException(
             status_code=403, detail="Current password is incorrect")
 
-    if len(newPassword) < 8:
+    if len(new_password) < 8:
         raise HTTPException(
             status_code=400, detail="Password must be at least 8 characters long")
 
-    if verify_password(newPassword, user["password"]):
+    if verify_password(new_password, user["password"]):
         raise HTTPException(
             status_code=400, detail="New password cannot be the same as the current password")
 
-    hashed_password = hash_password(newPassword)
+    hashed_password = hash_password(new_password)
 
     update_result = update_user_password_in_db(user_id, hashed_password)
 
@@ -149,14 +149,14 @@ def update_user_password(user_id: str, currentPassword: str, newPassword: str):
     return {"success": True, "message": "Password updated successfully"}
 
 
-def request_password_reset(userEmail: str):
-    user = get_user_by_email(userEmail)
+def request_password_reset(user_email: str):
+    user = get_user_by_email(user_email)
     if not user:
         return {"success": True, "message": "If this email is registered, a reset link has been sent."}
 
     reset_token = create_password_reset_token(user["userId"])
 
-    send_password_reset_email(userEmail, reset_token)
+    send_password_reset_email(user_email, reset_token)
 
     return {"success": True, "message": "If this email is registered, a reset link has been sent."}
 

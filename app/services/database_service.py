@@ -42,17 +42,17 @@ def get_user_by_refresh_token(refresh_token: str):
     return users_collection.find_one({"refreshToken": refresh_token})
 
 
-def get_user_by_email(userEmail: str) -> DbUserSchema | None:
+def get_user_by_email(user_email: str) -> DbUserSchema | None:
     users_collection = get_collection("users")
+    normalized_email = user_email.strip().lower()
+    return users_collection.find_one({"userEmail": normalized_email})
 
-    return users_collection.find_one({"userEmail": userEmail})
 
-
-def create_user(userEmail: str, hashed_password: str) -> None:
+def create_user(user_email: str, hashed_password: str) -> None:
     users_collection = get_collection("users")
     new_user = DbUserSchema(
         userId=str(uuid.uuid4()),
-        userEmail=userEmail,
+        userEmail=user_email.strip().lower(),
         username="New User",
         targetLanguage="en",
         appLanguage="en",
@@ -287,11 +287,11 @@ def search_corrections_in_db(user_id: str, query: str, page: int, limit: int) ->
         )
 
 
-def delete_correction_by_id(conversationId: str) -> bool:
-    print(f"Deleting correction with conversationId: {conversationId}")
+def delete_correction_by_id(conversation_id: str) -> bool:
+    print(f"Deleting correction with conversationId: {conversation_id}")
     corrections_collection = get_collection("corrections")
     result = corrections_collection.delete_one(
-        {"conversationId": conversationId})
+        {"conversationId": conversation_id})
     return result.deleted_count > 0
 
 

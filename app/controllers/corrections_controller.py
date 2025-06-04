@@ -56,8 +56,8 @@ def search_corrections(user_id: str, query: str, page: int, limit: int):
     return search_corrections_in_db(user_id, query, page, limit)
 
 
-def delete_correction(conversationId: str):
-    success = delete_correction_by_id(conversationId)
+def delete_correction(conversation_id: str):
+    success = delete_correction_by_id(conversation_id)
     if not success:
         raise HTTPException(status_code=404, detail="Correction not found")
     return {"success": True, "message": "Correction deleted successfully"}
