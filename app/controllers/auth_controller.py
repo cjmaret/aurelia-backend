@@ -28,6 +28,13 @@ def login_user(user_email: str, password: str):
     # store refresh token in database
     store_refresh_token(user["userId"], refresh_token)
 
+    if not user['emailVerified'] and not user['initialVerificationEmailSent']:
+        token = create_email_verification_token(
+            user["userId"], user["userEmail"])
+        send_email_verification(user['userEmail'], token)
+        print('Sent initial verification email, preparing to update user record.')
+        update_user_details_in_db(
+            user["userId"], {"initialVerificationEmailSent": True})
     # return access and refresh tokens
     return {
         "accessToken": access_token,
@@ -44,6 +51,7 @@ def register_user(user_email: str, password: str):
     # hash token
     hashed_password = hash_password(password)
     create_user(user_email, hashed_password)
+
     return {"message": "User registered successfully"}
 
 
@@ -61,8 +69,10 @@ def verify_email(token: str):
     # returns a tuple, both must be unpacked
     user_id, email = decode_email_verification_token(token)
     user = get_user_by_id(user_id)
+
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    
     update_user_details_in_db(user_id, {"emailVerified": True})
     send_email_verified_notification(email)
     return {"success": True, "message": "Email address verified!"}

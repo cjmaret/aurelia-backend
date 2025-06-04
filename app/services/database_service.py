@@ -53,6 +53,7 @@ def create_user(user_email: str, hashed_password: str) -> None:
     new_user = DbUserSchema(
         userId=str(uuid.uuid4()),
         userEmail=user_email.strip().lower(),
+        initialVerificationEmailSent=False,
         username="New User",
         targetLanguage="en",
         appLanguage="en",
