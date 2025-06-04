@@ -5,31 +5,31 @@ import smtplib
 from datetime import datetime
 
 
-def send_password_change_notification(userEmail: str):
+def send_email_verification(user_email: str, token: str):
+    verify_link = f"{Config.PASSWORD_RESET_LINK}/profileTab?token={token}"
+
     send_email(
-        to=userEmail,
-        subject="Your Password Has Been Changed",
-        title="Aurelia Notification",
-        body="Your password was successfully updated. If you did not make this change, please contact support immediately.",
+        to=user_email,
+        subject="Verify Your Email Address",
+        title="Verify Your Email",
+        body="Please verify your email address by clicking the button below. If you did not create an account, please ignore this email.",
+        button_text="Verify Email",
+        button_link=verify_link,
+    )
+
+
+def send_email_verified_notification(email: str):
+    send_email(
+        to=email,
+        subject="Your Email Has Been Verified!",
+        title="Email Verified",
+        body="Your email address has been successfully verified. Thank you for confirming your email! If you did not request this, please contact support immediately.",
         button_text="Contact Support",
         button_link="mailto:contactaurelialabs@gmail.com",
     )
 
 
-def send_password_reset_email(userEmail: str, reset_token: str):
-    reset_link = f"{Config.PASSWORD_RESET_LINK}/reset-password?token={reset_token}"
-
-    send_email(
-        to=userEmail,
-        subject="Reset Your Password",
-        title="Reset Your Password",
-        body="You requested a password reset. Click the button below to reset your password. This link will expire in 30 minutes.",
-        button_text="Reset Password",
-        button_link=reset_link,
-    )
-
-
-def send_email_verification(new_email: str, token: str):
+def send_change_email_verification(new_email: str, token: str):
     verify_link = f"{Config.PASSWORD_RESET_LINK}/change-email?token={token}"
 
     send_email(
@@ -53,6 +53,30 @@ def send_email_change_notification(new_email: str):
     )
 
 
+def send_password_change_notification(user_email: str):
+    send_email(
+        to=user_email,
+        subject="Your Password Has Been Changed",
+        title="Aurelia Notification",
+        body="Your password was successfully updated. If you did not make this change, please contact support immediately.",
+        button_text="Contact Support",
+        button_link="mailto:contactaurelialabs@gmail.com",
+    )
+
+
+def send_password_reset_email(userEmail: str, reset_token: str):
+    reset_link = f"{Config.PASSWORD_RESET_LINK}/reset-password?token={reset_token}"
+
+    send_email(
+        to=userEmail,
+        subject="Reset Your Password",
+        title="Reset Your Password",
+        body="You requested a password reset. Click the button below to reset your password. This link will expire in 30 minutes.",
+        button_text="Reset Password",
+        button_link=reset_link,
+    )
+
+
 def send_email(
     to: str,
     subject: str,
@@ -65,8 +89,6 @@ def send_email(
     smtp_port = 587
     sender_email = Config.EMAIL_USER
     sender_password = Config.EMAIL_PASS
-
-    print("button_link", button_link)
 
     html_body = f"""
     <html>

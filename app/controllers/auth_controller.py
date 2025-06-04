@@ -1,6 +1,6 @@
-from app.services.email_service import send_password_change_notification, send_password_reset_email
-from app.utils.auth_utils import decode_password_reset_token
-from app.services.database_service import delete_corrections_by_user_id, delete_user_by_id
+from app.services.email_service import send_email_verification, send_email_verified_notification, send_password_change_notification, send_password_reset_email
+from app.utils.auth_utils import create_email_verification_token, decode_email_verification_token, decode_password_reset_token
+from app.services.database_service import delete_corrections_by_user_id, delete_user_by_id, update_user_details_in_db
 from fastapi import HTTPException
 import jwt
 from app.services.database_service import get_user_by_email, create_user, get_user_by_id, get_user_by_refresh_token, store_refresh_token, update_user_password_in_db
@@ -12,7 +12,7 @@ def login_user(userEmail: str, password: str):
         raise HTTPException(
             status_code=400, detail="Email and password are required"
         )
-    
+
     # get user from database
     user = get_user_by_email(userEmail)
     if not user or not verify_password(password, user["password"]):
@@ -47,11 +47,32 @@ def register_user(userEmail: str, password: str):
     return {"message": "User registered successfully"}
 
 
+def request_email_verification(user_id: str):
+    user = get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    token = create_email_verification_token(user_id, user["userEmail"])
+    send_email_verification(user["userEmail"], token)
+    return {"success": True, "message": "Verification email sent to your address."}
+
+
+def verify_email(token: str):
+    # returns a tuple, both must be unpacked
+    user_id, email = decode_email_verification_token(token)
+    user = get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    update_user_details_in_db(user_id, {"emailVerified": True})
+    send_email_verified_notification(email)
+    return {"success": True, "message": "Email address verified!"}
+
+
 def delete_user(user_id: str):
     user = get_user_by_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
     delete_corrections_by_user_id(user_id)
 
     delete_result = delete_user_by_id(user_id)
@@ -89,8 +110,8 @@ def refresh_user_token(refresh_token: str):
     store_refresh_token(user["userId"], new_refresh_token)
 
     return {
-        "accessToken": new_access_token, 
-        "refreshToken": new_refresh_token,       
+        "accessToken": new_access_token,
+        "refreshToken": new_refresh_token,
         "tokenType": "bearer"
     }
 
@@ -132,7 +153,7 @@ def request_password_reset(userEmail: str):
     user = get_user_by_email(userEmail)
     if not user:
         return {"success": True, "message": "If this email is registered, a reset link has been sent."}
-    
+
     reset_token = create_password_reset_token(user["userId"])
 
     send_password_reset_email(userEmail, reset_token)
@@ -148,14 +169,14 @@ def reset_password(token: str, new_password: str):
     if len(new_password) < 8:
         raise HTTPException(
             status_code=400, detail="Password must be at least 8 characters long")
-    
+
     hashed_password = hash_password(new_password)
     update_result = update_user_password_in_db(user_id, hashed_password)
 
     if update_result.modified_count == 0:
         raise HTTPException(
             status_code=500, detail="Failed to reset the password. Please try again later.")
-    
+
     send_password_change_notification(user["userEmail"])
 
     return {"success": True, "message": "Password has been reset successfully"}

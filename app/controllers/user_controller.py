@@ -1,5 +1,5 @@
 from app.services.database_service import get_user_by_id, update_user_details_in_db, get_user_by_email
-from app.services.email_service import send_email_change_notification, send_email_verification
+from app.services.email_service import send_email_change_notification, send_change_email_verification
 from fastapi import HTTPException
 from app.schemas.reponse_schemas.user_details_response_schema import UserDetailsResponseSchema
 from app.schemas.request_schemas.user_details_request_schema import UserDetailsRequestSchema
@@ -47,35 +47,37 @@ def update_user_details(user_id: str, userDetails: UserDetailsRequestSchema):
         setupComplete=updated_user.get("setupComplete", False),
     )
 
+
 def request_email_change(user_id: str, new_email: str):
     if get_user_by_email(new_email):
         raise HTTPException(status_code=400, detail="Email already in use")
 
     token = create_email_verification_token(user_id, new_email)
 
-    send_email_verification(new_email, token)
+    send_change_email_verification(new_email, token)
 
     return {"success": True, "message": "Verification email sent to new address. Please verify to complete the change."}
 
+
 def change_user_email(token: str, password: str):
 
-    user_id, new_email = decode_email_verification_token(token)
+    user_id, email = decode_email_verification_token(token)
 
-    if get_user_by_email(new_email):
+    if get_user_by_email(email):
         raise HTTPException(status_code=400, detail="Email already in use")
-    
+
     user = get_user_by_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
     if not verify_password(password, user["password"]):
         raise HTTPException(status_code=401, detail="Incorrect password")
 
     update_user_details_in_db(user_id, {
-        "userEmail": new_email,
+        "userEmail": email,
         "emailVerified": True
     })
-    
-    send_email_change_notification(new_email)
+
+    send_email_change_notification(email)
 
     return {"success": True, "message": "Email address updated and verified."}

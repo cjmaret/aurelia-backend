@@ -79,10 +79,10 @@ def decode_password_reset_token(token: str):
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
-def create_email_verification_token(user_id: str, new_email: str, expires_minutes: int = 60) -> str:
+def create_email_verification_token(user_id: str, email: str, expires_minutes: int = 60) -> str:
     to_encode = {
         "sub": user_id,
-        "new_email": new_email,
+        "email": email,
         "type": "email_verification"
     }
     expire = datetime.utcnow() + timedelta(minutes=expires_minutes)
@@ -94,13 +94,17 @@ def create_email_verification_token(user_id: str, new_email: str, expires_minute
 def decode_email_verification_token(token: str):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+
         if payload.get("type") != "email_verification":
             raise HTTPException(status_code=401, detail="Invalid token type")
         user_id: str = payload.get("sub")
-        new_email: str = payload.get("new_email")
-        if user_id is None or new_email is None:
+        email: str = payload.get("email")
+
+        if user_id is None or email is None:
             raise HTTPException(status_code=401, detail="Invalid token")
-        return user_id, new_email
+        
+        return user_id, email
+    
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token has expired")
     except jwt.InvalidTokenError:

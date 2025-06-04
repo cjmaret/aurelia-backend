@@ -32,5 +32,4 @@ def request_email_change_route(
 
 @router.post("/api/v1/user/change-email")
 def change_email_route(request: ChangeEmailRequestSchema):
-    print("request", request)
     return change_user_email(request.token, request.password)
