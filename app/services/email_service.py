@@ -4,6 +4,7 @@ from email.mime.text import MIMEText
 import smtplib
 from datetime import datetime
 
+
 def send_password_change_notification(userEmail: str):
     send_email(
         to=userEmail,
@@ -28,6 +29,30 @@ def send_password_reset_email(userEmail: str, reset_token: str):
     )
 
 
+def send_email_verification(new_email: str, token: str):
+    verify_link = f"{Config.PASSWORD_RESET_LINK}/change-email?token={token}"
+
+    send_email(
+        to=new_email,
+        subject="Verify Your New Email Address",
+        title="Verify Your Email",
+        body="Please verify your new email address by clicking the button below. If you did not request this change, please ignore this email.",
+        button_text="Verify Email",
+        button_link=verify_link,
+    )
+
+
+def send_email_change_notification(new_email: str):
+    send_email(
+        to=new_email,
+        subject="Your Email Address Has Been Changed",
+        title="Aurelia Notification",
+        body="Your email address was successfully updated. If you did not make this change, please contact support immediately.",
+        button_text="Contact Support",
+        button_link="mailto:contactaurelialabs@gmail.com",
+    )
+
+
 def send_email(
     to: str,
     subject: str,
@@ -40,6 +65,8 @@ def send_email(
     smtp_port = 587
     sender_email = Config.EMAIL_USER
     sender_password = Config.EMAIL_PASS
+
+    print("button_link", button_link)
 
     html_body = f"""
     <html>

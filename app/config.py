@@ -1,10 +1,10 @@
 import os
 from dotenv import load_dotenv
 
-if os.path.exists(".env.production"):
-    load_dotenv(dotenv_path=".env.production")
-elif os.path.exists(".env.development"):
+if os.path.exists(".env.development"):
     load_dotenv(dotenv_path=".env.development")
+elif os.path.exists(".env.production"):
+    load_dotenv(dotenv_path=".env.production")
 
 
 class Config:
