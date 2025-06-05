@@ -1,6 +1,5 @@
 import logging
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from app.config import Config
 from app.routes.auth_route import router as auth_router
@@ -26,6 +25,9 @@ app.add_middleware(
 @app.get("/")
 def home():
     return {"message": "Aurelia API is running"}
+
+
+print("GOOGLE_CLIENT_ID:", Config.GOOGLE_CLIENT_ID)
 
 app.include_router(auth_router)
 app.include_router(user_router)

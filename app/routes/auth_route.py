@@ -68,16 +68,14 @@ def reset_password_route(request: ResetPasswordRequest):
     return reset_password(request.token, request.newPassword)
 
 # user first clicks to sign in with google
-
-
 @router.get("/auth/login/google")
 async def login_with_google(request: Request):
+    print('request', request)
     redirect_uri = Config.GOOGLE_REDIRECT_URI
+    print('redirect_uri', redirect_uri)
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
 # user is redirected back to this endpoint after authentication
-
-
 @router.get("/auth/callback/google")
 async def google_callback(request: Request):
     try:
@@ -91,4 +89,5 @@ async def google_callback(request: Request):
         redirect_uri = f"com.aureliaai.myapp:/auth/google-callback?token={access_token}"
         return RedirectResponse(redirect_uri)
     except Exception as e:
+        print("Google OAuth callback error:", e)
         raise HTTPException(status_code=400, detail=str(e))

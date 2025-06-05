@@ -194,17 +194,17 @@ def reset_password(token: str, new_password: str):
 
 # TODO: deal with this
 def process_google_user(user_info: dict):
-    userEmail = user_info["userEmail"]
-    user = get_user_by_email(userEmail)
+    user_email = user_info["userEmail"]
+    user = get_user_by_email(user_email)
 
     if not user:
         create_user(
-            userEmail=userEmail,
+            userEmail=user_email,
             hashed_password=None,
             user_id=user_info["sub"],
             email_verified=True,
         )
 
     # Generate token for the user
-    access_token = create_access_token(data={"userEmail": userEmail})
+    access_token = create_access_token(data={"userEmail": user_email})
     return {"access_token": access_token, "token_type": "bearer"}
