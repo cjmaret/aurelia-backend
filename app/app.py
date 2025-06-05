@@ -26,9 +26,6 @@ app.add_middleware(
 def home():
     return {"message": "Aurelia API is running"}
 
-
-print("GOOGLE_CLIENT_ID:", Config.GOOGLE_CLIENT_ID)
-
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(corrections_router)

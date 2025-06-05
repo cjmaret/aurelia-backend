@@ -70,9 +70,7 @@ def reset_password_route(request: ResetPasswordRequest):
 # user first clicks to sign in with google
 @router.get("/auth/login/google")
 async def login_with_google(request: Request):
-    print('request', request)
     redirect_uri = Config.GOOGLE_REDIRECT_URI
-    print('redirect_uri', redirect_uri)
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
 # user is redirected back to this endpoint after authentication

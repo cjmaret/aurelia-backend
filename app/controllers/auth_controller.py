@@ -72,7 +72,7 @@ def verify_email(token: str):
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
     update_user_details_in_db(user_id, {"emailVerified": True})
     send_email_verified_notification(email)
     return {"success": True, "message": "Email address verified!"}
@@ -192,19 +192,25 @@ def reset_password(token: str, new_password: str):
     return {"success": True, "message": "Password has been reset successfully"}
 
 
-# TODO: deal with this
 def process_google_user(user_info: dict):
-    user_email = user_info["userEmail"]
+    user_email = user_info.get("email")
+    oauth_user_id = user_info.get("sub")
+    if not user_email or not oauth_user_id:
+        raise HTTPException(
+            status_code=400, detail="Google account did not return required information."
+        )
+
     user = get_user_by_email(user_email)
 
     if not user:
         create_user(
-            userEmail=user_email,
+            user_email=user_email,
             hashed_password=None,
-            user_id=user_info["sub"],
             email_verified=True,
+            oauth_provider="google",
+            oauth_user_id=oauth_user_id,
         )
+        user = get_user_by_email(user_email) 
 
-    # Generate token for the user
-    access_token = create_access_token(data={"userEmail": user_email})
+    access_token = create_access_token(data={"sub": str(user["userId"])})
     return {"access_token": access_token, "token_type": "bearer"}

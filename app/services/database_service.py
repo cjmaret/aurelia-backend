@@ -48,17 +48,27 @@ def get_user_by_email(user_email: str) -> DbUserSchema | None:
     return users_collection.find_one({"userEmail": normalized_email})
 
 
-def create_user(user_email: str, hashed_password: str) -> None:
+def create_user(
+        user_email: str,
+        hashed_password: str,
+        email_verified: bool = False,
+        oauth_provider: str = None,
+        oauth_user_id: str = None
+) -> None:
     users_collection = get_collection("users")
     new_user = DbUserSchema(
         userId=str(uuid.uuid4()),
         userEmail=user_email.strip().lower(),
+        emailVerified=email_verified,
         initialVerificationEmailSent=False,
         username="New User",
         targetLanguage="en",
         appLanguage="en",
         createdAt=datetime.utcnow(),
+        setupComplete=False,
         password=hashed_password,
+        oauth_provider=oauth_provider,
+        oauth_user_id=oauth_user_id,
     )
     users_collection.insert_one(new_user.dict())
 
@@ -92,6 +102,7 @@ def update_user_password_in_db(user_id: str, hashed_password: str):
         {"$set": {"password": hashed_password}}
     )
     return result
+
 
 def get_corrections_by_user_id(user_id: str, page: int, limit: int) -> CorrectionResponse:
     try:
