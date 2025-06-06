@@ -86,10 +86,10 @@ async def google_callback(request: Request):
         tokens = process_google_user(user_info)
         access_token = tokens["accessToken"]
         refresh_token = tokens["refreshToken"]
-        
+
         redirect_uri = (
             # f"{Config.AURELIA_REDIRECT_URI}/auth/google-callback"
-            f"exp://192.168.1.104:8081/--/auth/google-callback"
+            f"exp://192.168.1.104:8081/--/google-callback"
             f"?accessToken={access_token}&refreshToken={refresh_token}"
         )
 
