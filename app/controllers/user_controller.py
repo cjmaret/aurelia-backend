@@ -20,7 +20,7 @@ def get_user_details(user_id: str):
         targetLanguage=user.get("targetLanguage"),
         appLanguage=user.get("appLanguage"),
         setupComplete=user.get("setupComplete", False),
-        oauth_provider=user.get("oauth_provider", None),
+        oauthProvider=user.get("oauthProvider", None),
     )
 
 
@@ -46,13 +46,13 @@ def update_user_details(user_id: str, user_details: UserDetailsRequestSchema):
         targetLanguage=updated_user.get("targetLanguage"),
         appLanguage=updated_user.get("appLanguage"),
         setupComplete=updated_user.get("setupComplete", False),
-        oauth_provider=updated_user.get("oauth_provider", None),
+        oauthProvider=updated_user.get("oauthProvider", None),
     )
 
 
 def request_email_change(user_id: str, new_email: str):
     user = get_user_by_id(user_id)
-    if user.get("oauth_provider") == "google":
+    if user.get("oauthProvider") == "google":
         raise HTTPException(status_code=400, detail="Google sign-in users cannot set or reset a password.")
 
     normalized_email = new_email.strip().lower()

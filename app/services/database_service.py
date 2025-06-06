@@ -67,8 +67,8 @@ def create_user(
         createdAt=datetime.utcnow(),
         setupComplete=False,
         password=hashed_password,
-        oauth_provider=oauth_provider,
-        oauth_user_id=oauth_user_id,
+        oauthProvider=oauth_provider,
+        oauthUserId=oauth_user_id,
     )
     users_collection.insert_one(new_user.dict())
 

@@ -48,7 +48,7 @@ def request_email_verification(user_id: str):
     user = get_user_by_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    if user and user.get("oauth_provider") == "google":
+    if user and user.get("oauthProvider") == "google":
         raise HTTPException(
             status_code=400, detail="Google sign-in users cannot set or reset their email.")
 
@@ -112,7 +112,7 @@ def update_user_password(user_id: str, current_password: str, new_password: str)
     user = get_user_by_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    if user.get("oauth_provider") == "google":
+    if user.get("oauthProvider") == "google":
         raise HTTPException(
             status_code=403, detail="Google sign-in users cannot set or reset a password.")
 
@@ -145,7 +145,7 @@ def update_user_password(user_id: str, current_password: str, new_password: str)
 
 def request_password_reset(user_email: str):
     user = get_user_by_email(user_email)
-    if user and user.get("oauth_provider") == "google":
+    if user and user.get("oauthProvider") == "google":
         raise HTTPException(
             status_code=403,
             detail="This account uses Google sign-in. Please use 'Sign in with Google' to access your account."
@@ -165,7 +165,7 @@ def reset_password(token: str, new_password: str):
     user = get_user_by_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    if user and user.get("oauth_provider") == "google":
+    if user and user.get("oauthProvider") == "google":
         raise HTTPException(status_code=400, detail="This account uses Google sign-in. Use 'Sign in with Google' instead.")
     if len(new_password) < 8:
         raise HTTPException(
@@ -195,7 +195,7 @@ def process_google_user(user_info: dict):
 
     if user:
         # if user exists but not with google, block login
-        if not user.get("oauth_provider"):
+        if not user.get("oauthProvider"):
             raise HTTPException(
                 status_code=400,
                 detail="An account with this email already exists. Please log in with your password."

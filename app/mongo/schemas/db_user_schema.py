@@ -13,6 +13,6 @@ class DbUserSchema(BaseModel):
     createdAt: datetime
     setupComplete: bool = False
     password: Optional[str]
-    oauth_provider: Optional[str] = None 
-    oauth_user_id: Optional[str] = None
+    oauthProvider: Optional[str] = None 
+    oauthUserId: Optional[str] = None
     refreshToken: Optional[str] = None
