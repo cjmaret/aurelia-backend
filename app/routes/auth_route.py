@@ -93,8 +93,6 @@ async def google_callback(request: Request):
             f"?accessToken={access_token}&refreshToken={refresh_token}"
         )
 
-        print("Redirecting to:", redirect_uri)
-
         # redirect to app with tokens
         return RedirectResponse(redirect_uri)
     except Exception as e:

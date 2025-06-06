@@ -13,7 +13,6 @@ def login_user(user_email: str, password: str):
             status_code=400, detail="Email and password are required"
         )
 
-    print(f"Attempting to log in user with email: {user_email}")
     # get user from database
     user = get_user_by_email(user_email)
     if not user or not verify_password(password, user["password"]):
@@ -49,6 +48,9 @@ def request_email_verification(user_id: str):
     user = get_user_by_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    if user and user.get("oauth_provider") == "google":
+        raise HTTPException(
+            status_code=400, detail="Google sign-in users cannot set or reset their email.")
 
     token = create_email_verification_token(user_id, user["userEmail"])
     send_email_verification(user["userEmail"], token)
@@ -110,6 +112,9 @@ def update_user_password(user_id: str, current_password: str, new_password: str)
     user = get_user_by_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    if user.get("oauth_provider") == "google":
+        raise HTTPException(
+            status_code=403, detail="Google sign-in users cannot set or reset a password.")
 
     if not verify_password(current_password, user["password"]):
         raise HTTPException(
@@ -140,11 +145,16 @@ def update_user_password(user_id: str, current_password: str, new_password: str)
 
 def request_password_reset(user_email: str):
     user = get_user_by_email(user_email)
+    if user and user.get("oauth_provider") == "google":
+        raise HTTPException(
+            status_code=403,
+            detail="This account uses Google sign-in. Please use 'Sign in with Google' to access your account."
+        )
+    
     if not user:
         return {"success": True, "message": "If this email is registered, a reset link has been sent."}
 
     reset_token = create_password_reset_token(user["userId"])
-
     send_password_reset_email(user_email, reset_token)
 
     return {"success": True, "message": "If this email is registered, a reset link has been sent."}
@@ -155,6 +165,8 @@ def reset_password(token: str, new_password: str):
     user = get_user_by_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    if user and user.get("oauth_provider") == "google":
+        raise HTTPException(status_code=400, detail="This account uses Google sign-in. Use 'Sign in with Google' instead.")
     if len(new_password) < 8:
         raise HTTPException(
             status_code=400, detail="Password must be at least 8 characters long")
@@ -181,16 +193,26 @@ def process_google_user(user_info: dict):
 
     user = get_user_by_email(user_email)
 
-    if not user:
-        create_user(
-            user_email=user_email,
-            hashed_password=None,
-            email_verified=True,
-            oauth_provider="google",
-            oauth_user_id=oauth_user_id,
-        )
-        user = get_user_by_email(user_email)
+    if user:
+        # if user exists but not with google, block login
+        if not user.get("oauth_provider"):
+            raise HTTPException(
+                status_code=400,
+                detail="An account with this email already exists. Please log in with your password."
+            )
+        # if user a google user, login
+        return create_and_return_auth_tokens(user["userId"])
 
+    # if user doesnt exist, create a new user
+    create_user(
+        user_email=user_email,
+        hashed_password=None,
+        email_verified=True,
+        oauth_provider="google",
+        oauth_user_id=oauth_user_id,
+    )
+
+    user = get_user_by_email(user_email)
     return create_and_return_auth_tokens(user["userId"])
 
 

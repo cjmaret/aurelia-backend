@@ -49,6 +49,9 @@ def update_user_details(user_id: str, user_details: UserDetailsRequestSchema):
 
 
 def request_email_change(user_id: str, new_email: str):
+    user = get_user_by_id(user_id)
+    if user.get("oauth_provider") == "google":
+        raise HTTPException(status_code=400, detail="Google sign-in users cannot set or reset a password.")
 
     normalized_email = new_email.strip().lower()
     if get_user_by_email(normalized_email):

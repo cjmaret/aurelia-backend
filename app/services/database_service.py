@@ -50,7 +50,7 @@ def get_user_by_email(user_email: str) -> DbUserSchema | None:
 
 def create_user(
         user_email: str,
-        hashed_password: str,
+        hashed_password: str = None,
         email_verified: bool = False,
         oauth_provider: str = None,
         oauth_user_id: str = None
@@ -96,7 +96,7 @@ def update_user_details_in_db(user_id: str, userDetails: UserDetailsRequestSchem
 
 def update_user_password_in_db(user_id: str, hashed_password: str):
     users_collection = get_collection("users")
-    print(f"Updating password for user {user_id}")
+    
     result = users_collection.update_one(
         {"userId": user_id},
         {"$set": {"password": hashed_password}}
@@ -259,9 +259,6 @@ def search_corrections_in_db(user_id: str, query: str, page: int, limit: int) ->
         corrections_collection = get_collection("corrections")
 
         skip = (page - 1) * limit
-
-        print(
-            f"Searching for corrections for user {user_id} with query: {query}")
 
         # text search
         corrections_cursor = corrections_collection.find(
