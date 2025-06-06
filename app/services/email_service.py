@@ -6,7 +6,7 @@ from datetime import datetime
 
 
 def send_email_verification(user_email: str, token: str):
-    verify_link = f"{Config.PASSWORD_RESET_LINK}/profileTab?token={token}"
+    verify_link = f"{Config.AURELIA_REDIRECT_URI}/profileTab?token={token}"
 
     send_email(
         to=user_email,
@@ -30,7 +30,7 @@ def send_email_verified_notification(email: str):
 
 
 def send_change_email_verification(new_email: str, token: str):
-    verify_link = f"{Config.PASSWORD_RESET_LINK}/change-email?token={token}"
+    verify_link = f"{Config.AURELIA_REDIRECT_URI}/change-email?token={token}"
 
     send_email(
         to=new_email,
@@ -65,7 +65,7 @@ def send_password_change_notification(user_email: str):
 
 
 def send_password_reset_email(userEmail: str, reset_token: str):
-    reset_link = f"{Config.PASSWORD_RESET_LINK}/reset-password?token={reset_token}"
+    reset_link = f"{Config.AURELIA_REDIRECT_URI}/reset-password?token={reset_token}"
 
     send_email(
         to=userEmail,

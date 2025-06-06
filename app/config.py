@@ -21,7 +21,7 @@ class Config:
     GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
     GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
     GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
-    PASSWORD_RESET_LINK = os.getenv("PASSWORD_RESET_LINK")
+    AURELIA_REDIRECT_URI = os.getenv("AURELIA_REDIRECT_URI")
 
     @staticmethod
     def validate():
