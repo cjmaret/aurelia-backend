@@ -14,3 +14,5 @@ class UserDetailsResponseSchema(BaseModel):
         None, description="The language the app communicates in")
     setupComplete: bool = Field(
         False, description="Whether the user has completed the setup process")
+    oauth_provider: Optional[str] = Field(
+        None, description="The OAuth provider used for authentication (if any)")

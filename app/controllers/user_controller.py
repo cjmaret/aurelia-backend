@@ -20,6 +20,7 @@ def get_user_details(user_id: str):
         targetLanguage=user.get("targetLanguage"),
         appLanguage=user.get("appLanguage"),
         setupComplete=user.get("setupComplete", False),
+        oauth_provider=user.get("oauth_provider", None),
     )
 
 
@@ -45,6 +46,7 @@ def update_user_details(user_id: str, user_details: UserDetailsRequestSchema):
         targetLanguage=updated_user.get("targetLanguage"),
         appLanguage=updated_user.get("appLanguage"),
         setupComplete=updated_user.get("setupComplete", False),
+        oauth_provider=updated_user.get("oauth_provider", None),
     )
 
 
