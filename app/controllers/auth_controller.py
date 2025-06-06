@@ -21,13 +21,6 @@ def login_user(user_email: str, password: str):
             status_code=401, detail="Invalid email or password"
         )
 
-    # generate tokens
-    access_token = create_access_token(data={"sub": str(user["userId"])})
-    refresh_token = create_refresh_token(data={"sub": str(user["userId"])})
-
-    # store refresh token in database
-    store_refresh_token(user["userId"], refresh_token)
-
     if not user['emailVerified'] and not user['initialVerificationEmailSent']:
         token = create_email_verification_token(
             user["userId"], user["userEmail"])
@@ -35,12 +28,9 @@ def login_user(user_email: str, password: str):
         print('Sent initial verification email, preparing to update user record.')
         update_user_details_in_db(
             user["userId"], {"initialVerificationEmailSent": True})
+        
     # return access and refresh tokens
-    return {
-        "accessToken": access_token,
-        "refreshToken": refresh_token,
-        "tokenType": "bearer"
-    }
+    return create_and_return_auth_tokens(user["userId"])
 
 
 def register_user(user_email: str, password: str):
@@ -112,18 +102,7 @@ def refresh_user_token(refresh_token: str):
     if not user:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
-    # generate access and refresh tokens
-    new_access_token = create_access_token({"sub": user["userId"]})
-    new_refresh_token = create_refresh_token({"sub": user["userId"]})
-
-    # store refresh token in database
-    store_refresh_token(user["userId"], new_refresh_token)
-
-    return {
-        "accessToken": new_access_token,
-        "refreshToken": new_refresh_token,
-        "tokenType": "bearer"
-    }
+    return create_and_return_auth_tokens(user["userId"])
 
 
 def update_user_password(user_id: str, current_password: str, new_password: str):
@@ -210,7 +189,22 @@ def process_google_user(user_info: dict):
             oauth_provider="google",
             oauth_user_id=oauth_user_id,
         )
-        user = get_user_by_email(user_email) 
+        user = get_user_by_email(user_email)
 
-    access_token = create_access_token(data={"sub": str(user["userId"])})
-    return {"access_token": access_token, "token_type": "bearer"}
+    return create_and_return_auth_tokens(user["userId"])
+
+
+def create_and_return_auth_tokens(user_id: str):
+    access_token = create_access_token(data={"sub": str(user_id)})
+    refresh_token = create_refresh_token(data={"sub": str(user_id)})
+
+    print('doin stuff', user_id, access_token, refresh_token)
+
+    # store refresh token in database
+    store_refresh_token(user_id, refresh_token)
+
+    return {
+        "accessToken": access_token,
+        "refreshToken": refresh_token,
+        "tokenType": "bearer"
+    }

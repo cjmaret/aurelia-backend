@@ -84,7 +84,10 @@ async def google_callback(request: Request):
                 status_code=400, detail="Failed to retrieve user info")
 
         access_token = process_google_user(user_info)
-        redirect_uri = f"com.aureliaai.myapp:/auth/google-callback?token={access_token}"
+        redirect_uri = (
+            f"com.aureliaai.myapp:/auth/google-callback"
+            f"?accessToken={access_token}&refreshToken={refresh_token}"
+        )
         return RedirectResponse(redirect_uri)
     except Exception as e:
         print("Google OAuth callback error:", e)
