@@ -198,8 +198,6 @@ def create_and_return_auth_tokens(user_id: str):
     access_token = create_access_token(data={"sub": str(user_id)})
     refresh_token = create_refresh_token(data={"sub": str(user_id)})
 
-    print('doin stuff', user_id, access_token, refresh_token)
-
     # store refresh token in database
     store_refresh_token(user_id, refresh_token)
 
