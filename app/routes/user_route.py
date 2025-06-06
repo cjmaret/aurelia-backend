@@ -14,7 +14,6 @@ router = APIRouter()
 def get_user_details_route(user_id: str = Depends(get_current_user_from_token)):
     return get_user_details(user_id)
 
-
 @router.patch("/api/v1/user/details")
 def update_user_details_route(
     userDetails: UserDetailsRequestSchema,

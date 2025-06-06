@@ -15,6 +15,11 @@ def login_user(user_email: str, password: str):
 
     # get user from database
     user = get_user_by_email(user_email)
+    
+    if user and user.get("oauthProvider") == "google":
+        raise HTTPException(
+            status_code=405, detail="This account uses Google sign-in. Please use 'Sign in with Google' instead.")
+
     if not user or not verify_password(password, user["password"]):
         raise HTTPException(
             status_code=401, detail="Invalid email or password"
