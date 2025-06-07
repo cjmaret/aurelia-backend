@@ -1,10 +1,13 @@
+from app.config import Config
 from app.services.email_service import send_email_verification, send_email_verified_notification, send_password_change_notification, send_password_reset_email
 from app.utils.auth_utils import create_email_verification_token, decode_email_verification_token, decode_password_reset_token
 from app.services.database_service import delete_corrections_by_user_id, delete_user_by_id, update_user_details_in_db
 from fastapi import HTTPException
+from fastapi.responses import RedirectResponse
 import jwt
 from app.services.database_service import get_user_by_email, create_user, get_user_by_id, get_user_by_refresh_token, store_refresh_token, update_user_password_in_db
 from app.utils.auth_utils import ALGORITHM, SECRET_KEY, create_access_token, create_password_reset_token, create_refresh_token, verify_password, hash_password
+from app.services.oauth_service import oauth
 
 
 def login_user(user_email: str, password: str):
@@ -15,7 +18,7 @@ def login_user(user_email: str, password: str):
 
     # get user from database
     user = get_user_by_email(user_email)
-    
+
     if user and user.get("oauthProvider") == "google":
         raise HTTPException(
             status_code=405, detail="This account uses Google sign-in. Please use 'Sign in with Google' instead.")
@@ -32,7 +35,7 @@ def login_user(user_email: str, password: str):
         print('Sent initial verification email, preparing to update user record.')
         update_user_details_in_db(
             user["userId"], {"initialVerificationEmailSent": True})
-        
+
     # return access and refresh tokens
     return create_and_return_auth_tokens(user["userId"])
 
@@ -155,7 +158,7 @@ def request_password_reset(user_email: str):
             status_code=403,
             detail="This account uses Google sign-in. Please use 'Sign in with Google' to access your account."
         )
-    
+
     if not user:
         return {"success": True, "message": "If this email is registered, a reset link has been sent."}
 
@@ -171,7 +174,8 @@ def reset_password(token: str, new_password: str):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if user and user.get("oauthProvider") == "google":
-        raise HTTPException(status_code=400, detail="This account uses Google sign-in. Use 'Sign in with Google' instead.")
+        raise HTTPException(
+            status_code=400, detail="This account uses Google sign-in. Use 'Sign in with Google' instead.")
     if len(new_password) < 8:
         raise HTTPException(
             status_code=400, detail="Password must be at least 8 characters long")
@@ -186,6 +190,36 @@ def reset_password(token: str, new_password: str):
     send_password_change_notification(user["userEmail"])
 
     return {"success": True, "message": "Password has been reset successfully"}
+
+
+async def login_with_google(request):
+    redirect_uri = Config.GOOGLE_REDIRECT_URI
+    return await oauth.google.authorize_redirect(request, redirect_uri)
+
+
+async def google_callback(request):
+    try:
+        token = await oauth.google.authorize_access_token(request)
+        user_info = token.get("userinfo")  # retrieve user info from the token
+        if not user_info:
+            raise HTTPException(
+                status_code=400, detail="Failed to retrieve user info")
+
+        tokens = process_google_user(user_info)
+        access_token = tokens["accessToken"]
+        refresh_token = tokens["refreshToken"]
+
+        redirect_uri = (
+            # f"{Config.AURELIA_REDIRECT_URI}/google-callback"
+            f"exp://192.168.1.104:8081/--/google-callback"
+            f"?accessToken={access_token}&refreshToken={refresh_token}"
+        )
+
+        # redirect to app with tokens
+        return RedirectResponse(redirect_uri)
+    except Exception as e:
+        print("Google OAuth callback error:", e)
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 def process_google_user(user_info: dict):

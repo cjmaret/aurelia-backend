@@ -1,7 +1,5 @@
-from fastapi import APIRouter, Body, Depends, HTTPException, Request
-from fastapi.responses import RedirectResponse
-from app.config import Config
-from app.controllers.auth_controller import login_user, process_google_user, refresh_user_token, register_user, request_email_verification, request_password_reset, reset_password, update_user_password, delete_user, verify_email
+from fastapi import APIRouter, Depends, Request
+from app.controllers.auth_controller import google_callback, login_user, login_with_google, refresh_user_token, register_user, request_email_verification, request_password_reset, reset_password, update_user_password, delete_user, verify_email
 from app.schemas.request_schemas.refresh_token_request_schema import RefreshTokenRequest
 from app.schemas.request_schemas.request_password_reset_request_schema import RequestPasswordResetRequest
 from app.schemas.request_schemas.update_password_request_schema import UpdatePasswordRequest
@@ -68,33 +66,14 @@ def reset_password_route(request: ResetPasswordRequest):
     return reset_password(request.token, request.newPassword)
 
 # user first clicks to sign in with google
+
+
 @router.get("/auth/login/google")
-async def login_with_google(request: Request):
-    redirect_uri = Config.GOOGLE_REDIRECT_URI
-    return await oauth.google.authorize_redirect(request, redirect_uri)
+async def login_with_google_route(request: Request):
+    return await login_with_google(request)
+
 
 # user is redirected back to this endpoint after authentication
 @router.get("/auth/callback/google")
-async def google_callback(request: Request):
-    try:
-        token = await oauth.google.authorize_access_token(request)
-        user_info = token.get("userinfo")  # retrieve user info from the token
-        if not user_info:
-            raise HTTPException(
-                status_code=400, detail="Failed to retrieve user info")
-
-        tokens = process_google_user(user_info)
-        access_token = tokens["accessToken"]
-        refresh_token = tokens["refreshToken"]
-
-        redirect_uri = (
-            # f"{Config.AURELIA_REDIRECT_URI}/auth/google-callback"
-            f"exp://192.168.1.104:8081/--/google-callback"
-            f"?accessToken={access_token}&refreshToken={refresh_token}"
-        )
-
-        # redirect to app with tokens
-        return RedirectResponse(redirect_uri)
-    except Exception as e:
-        print("Google OAuth callback error:", e)
-        raise HTTPException(status_code=400, detail=str(e))
+async def google_callback_route(request: Request):
+    return await google_callback(request)
