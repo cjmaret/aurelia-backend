@@ -65,8 +65,6 @@ def request_password_reset_route(request: RequestPasswordResetRequest):
 def reset_password_route(request: ResetPasswordRequest):
     return reset_password(request.token, request.newPassword)
 
-# user first clicks to sign in with google
-
 
 @router.get("/auth/login/google")
 async def login_with_google_route(request: Request):
