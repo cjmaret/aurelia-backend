@@ -2,6 +2,7 @@ import logging
 import os
 # used for file manipulation (copying files)
 import shutil
+import uuid
 from app.mongo.schemas.db_user_schema import DbUserSchema
 from paths import DATA_DIR
 # handles audio file conversion and manipulation
@@ -21,7 +22,9 @@ def format_and_transcribe_audio(file, user: DbUserSchema):
 
     print(f"Received file: {file.filename}")
 
-    file_path = os.path.join(DATA_DIR, file.filename)
+    unique_id = str(uuid.uuid4())
+    ext = os.path.splitext(file.filename)[1] or ".m4a"
+    file_path = os.path.join(DATA_DIR, f"{unique_id}{ext}")
 
     # save uploaded file
     try:
@@ -50,11 +53,17 @@ def format_and_transcribe_audio(file, user: DbUserSchema):
     if not transcription.strip():
         raise ValueError("No speech detected in the audio file.")
 
+    # clean up temporary files
+    try:
+        os.remove(file_path)
+        os.remove(wav_path)
+    except Exception:
+        pass
+
     return transcription
 
 
 def clean_audio(input_path: str) -> str:
-    print(f"Cleaning audio file: {input_path}")
     output_path = input_path.replace(".mp3", ".wav").replace(".m4a", ".wav")
     convert_to_wav(input_path, output_path)
     print(f"Converted audio file saved to: {output_path}")

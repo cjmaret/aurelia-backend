@@ -248,7 +248,7 @@ def check_for_recent_correction(user_id: str, collection, created_at_datetime: d
     if most_recent_correction:
         time_diff = created_at_datetime - most_recent_correction["createdAt"]
 
-        if time_diff < timedelta(minutes=.1):
+        if time_diff < timedelta(minutes=.5):
             return most_recent_correction
 
     return None
