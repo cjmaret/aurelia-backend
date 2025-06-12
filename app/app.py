@@ -21,6 +21,7 @@ app.add_middleware(
     session_cookie="session",
     https_only=True,
     same_site="none",
+    domain=".aurelialabs.net",
 ) 
 
 # home route
