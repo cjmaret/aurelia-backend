@@ -200,14 +200,21 @@ logger = logging.getLogger("google_auth")
 async def login_with_google(request):
     logger.info("Starting Google OAuth login flow")
     logger.debug(f"Session before Google login: {request.session}")
+    logger.debug(
+        f"Session keys before Google login: {list(request.session.keys())}")
     redirect_uri = Config.GOOGLE_REDIRECT_URI
     logger.debug(f"Redirect URI for Google OAuth: {redirect_uri}")
-    return await oauth.google.authorize_redirect(request, redirect_uri)
+    response = await oauth.google.authorize_redirect(request, redirect_uri)
+    logger.debug(
+        f"Session keys after Google login: {list(request.session.keys())}")
+    return response
 
 
 async def google_callback(request):
     logger.info("Google OAuth callback received")
     logger.debug(f"Session at Google callback: {request.session}")
+    logger.debug(
+        f"Session keys at Google callback: {list(request.session.keys())}")
     try:
         token = await oauth.google.authorize_access_token(request)
         logger.debug(f"Token received from Google: {token}")
@@ -283,14 +290,21 @@ logger = logging.getLogger("apple_auth")
 async def login_with_apple(request):
     logger.info("Starting Apple OAuth login flow")
     logger.debug(f"Session before Apple login: {request.session}")
+    logger.debug(
+        f"Session keys before Apple login: {list(request.session.keys())}")
     redirect_uri = Config.APPLE_REDIRECT_URI
     logger.debug(f"Redirect URI for Apple OAuth: {redirect_uri}")
-    return await oauth.apple.authorize_redirect(request, redirect_uri)
+    response = await oauth.apple.authorize_redirect(request, redirect_uri)
+    logger.debug(
+        f"Session keys after Apple login: {list(request.session.keys())}")
+    return response
 
 
 async def apple_callback(request):
     logger.info("Apple OAuth callback received")
     logger.debug(f"Session at Apple callback: {request.session}")
+    logger.debug(
+        f"Session keys at Apple callback: {list(request.session.keys())}")
     try:
         token = await oauth.apple.authorize_access_token(request)
         logger.debug(f"Token received from Apple: {token}")
