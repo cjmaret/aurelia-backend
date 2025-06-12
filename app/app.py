@@ -19,9 +19,9 @@ app.add_middleware(
     SessionMiddleware,
     secret_key=Config.SECRET_KEY,  
     session_cookie="session",
-    https_only=True,
-    same_site="none",
-    domain=".aurelialabs.net",
+    # https_only=True,
+    # same_site="none",
+    # domain=".aurelialabs.net",
 ) 
 
 # home route
