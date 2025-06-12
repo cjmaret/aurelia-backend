@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Request
-from app.controllers.auth_controller import google_callback, login_user, login_with_google, refresh_user_token, register_user, request_email_verification, request_password_reset, reset_password, update_user_password, delete_user, verify_email
+from app.controllers.auth_controller import apple_callback, google_callback, login_user, login_with_apple, login_with_google, refresh_user_token, register_user, request_email_verification, request_password_reset, reset_password, update_user_password, delete_user, verify_email
 from app.schemas.request_schemas.refresh_token_request_schema import RefreshTokenRequest
 from app.schemas.request_schemas.request_password_reset_request_schema import RequestPasswordResetRequest
 from app.schemas.request_schemas.update_password_request_schema import UpdatePasswordRequest
@@ -65,13 +65,22 @@ def request_password_reset_route(request: RequestPasswordResetRequest):
 def reset_password_route(request: ResetPasswordRequest):
     return reset_password(request.token, request.newPassword)
 
-
+# third party authentication routes
 @router.get("/auth/login/google")
 async def login_with_google_route(request: Request):
     return await login_with_google(request)
 
 
-# user is redirected back to this endpoint after authentication
 @router.get("/auth/callback/google")
 async def google_callback_route(request: Request):
     return await google_callback(request)
+
+
+@router.get("/auth/login/apple")
+async def login_with_apple_route(request: Request):
+    return await login_with_apple(request)
+
+
+@router.post("/auth/callback/apple")
+async def apple_callback_route(request: Request):
+    return await apple_callback(request)

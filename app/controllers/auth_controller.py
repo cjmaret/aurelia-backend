@@ -5,6 +5,7 @@ from app.services.database_service import delete_corrections_by_user_id, delete_
 from fastapi import HTTPException
 from fastapi.responses import RedirectResponse
 import jwt
+from jose import jwt
 from app.services.database_service import get_user_by_email, create_user, get_user_by_id, get_user_by_refresh_token, store_refresh_token, update_user_password_in_db
 from app.utils.auth_utils import ALGORITHM, SECRET_KEY, create_access_token, create_password_reset_token, create_refresh_token, verify_password, hash_password
 from app.services.oauth_service import oauth
@@ -252,6 +253,96 @@ def process_google_user(user_info: dict):
     )
 
     user = get_user_by_email(user_email)
+    return create_and_return_auth_tokens(user["userId"])
+
+##
+##
+##
+##
+##
+
+import logging
+logger = logging.getLogger("apple_auth")
+
+
+async def login_with_apple(request):
+    logger.info("Starting Apple OAuth login flow")
+    redirect_uri = Config.APPLE_REDIRECT_URI
+    logger.debug(f"Redirect URI for Apple OAuth: {redirect_uri}")
+    return await oauth.apple.authorize_redirect(request, redirect_uri)
+
+
+async def apple_callback(request):
+    logger.info("Apple OAuth callback received")
+    try:
+        token = await oauth.apple.authorize_access_token(request)
+        logger.debug(f"Token received from Apple: {token}")
+        id_token = token.get("id_token")
+        if not id_token:
+            logger.error("No id_token found in Apple response")
+            raise HTTPException(
+                status_code=400, detail="Failed to retrieve id_token from Apple.")
+
+        # Decode the id_token (JWT) to get user info
+        user_info = jwt.get_unverified_claims(id_token)
+        logger.debug(f"Decoded user_info from id_token: {user_info}")
+        user_email = user_info.get("email")
+        oauth_user_id = user_info.get("sub")
+        if not user_email or not oauth_user_id:
+            logger.error("Missing email or sub in Apple id_token")
+            raise HTTPException(
+                status_code=400, detail="Apple account did not return required information.")
+
+        tokens = process_apple_user(user_info)
+        access_token = tokens["accessToken"]
+        refresh_token = tokens["refreshToken"]
+
+        redirect_uri = (
+            f"{Config.AURELIA_REDIRECT_URI}/apple-callback"
+            f"?accessToken={access_token}&refreshToken={refresh_token}"
+        )
+        logger.info(f"Redirecting to: {redirect_uri}")
+        return RedirectResponse(redirect_uri)
+    except Exception as e:
+        logger.exception("Apple OAuth callback error")
+        print("Apple OAuth callback error:", e)
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+def process_apple_user(user_info: dict):
+    logger.info("Processing Apple user")
+    user_email = user_info.get("email")
+    oauth_user_id = user_info.get("sub")
+    if not user_email or not oauth_user_id:
+        logger.error("Apple account did not return required information.")
+        raise HTTPException(
+            status_code=400, detail="Apple account did not return required information."
+        )
+
+    user = get_user_by_email(user_email)
+    logger.debug(f"User found by email: {user}")
+
+    if user:
+        if not user.get("oauthProvider"):
+            logger.warning(
+                "Account exists with this email but not with Apple OAuth")
+            raise HTTPException(
+                status_code=400,
+                detail="An account with this email already exists. Please log in with your password."
+            )
+        logger.info("Returning tokens for existing Apple user")
+        return create_and_return_auth_tokens(user["userId"])
+
+    create_user(
+        user_email=user_email,
+        hashed_password=None,
+        email_verified=True,
+        oauth_provider="apple",
+        oauth_user_id=oauth_user_id,
+    )
+
+    user = get_user_by_email(user_email)
+    logger.info("Returning tokens for newly created Apple user")
     return create_and_return_auth_tokens(user["userId"])
 
 

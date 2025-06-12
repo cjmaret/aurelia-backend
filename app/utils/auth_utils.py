@@ -109,3 +109,24 @@ def decode_email_verification_token(token: str):
         raise HTTPException(status_code=401, detail="Token has expired")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
+
+
+def generate_apple_client_secret():
+    headers = {
+        "kid": Config.APPLE_KEY_ID,
+        "alg": "ES256"
+    }
+    payload = {
+        "iss": Config.APPLE_TEAM_ID,
+        "iat": int(datetime.utcnow().timestamp()),
+        "exp": int((datetime.utcnow() + timedelta(days=180)).timestamp()),
+        "aud": "https://appleid.apple.com",
+        "sub": Config.APPLE_CLIENT_ID,
+    }
+    client_secret = jwt.encode(
+        payload,
+        Config.APPLE_PRIVATE_KEY,
+        algorithm="ES256",
+        headers=headers
+    )
+    return client_secret
