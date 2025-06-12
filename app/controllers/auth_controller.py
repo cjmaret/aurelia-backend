@@ -304,6 +304,8 @@ async def login_with_apple(request):
 
 async def apple_callback(request):
     logger.info("Apple OAuth callback received")
+    form = await request.form()
+    logger.debug(f"Apple callback POST data: {form}")
     logger.debug(f"Session at Apple callback: {request.session}")
     logger.debug(
         f"Session keys at Apple callback: {list(request.session.keys())}")
