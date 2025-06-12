@@ -18,7 +18,8 @@ logging.basicConfig(
 app.add_middleware(
     SessionMiddleware,
     secret_key=Config.SECRET_KEY,  
-    session_cookie="session", 
+    session_cookie="session",
+    https_only=True,
 ) 
 
 # home route
