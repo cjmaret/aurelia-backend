@@ -1,5 +1,5 @@
 import logging
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from starlette.middleware.sessions import SessionMiddleware
 from app.config import Config
 from app.routes.auth_route import router as auth_router
@@ -20,9 +20,17 @@ app.add_middleware(
     secret_key=Config.SECRET_KEY,  
     session_cookie="session",
     # https_only=True,
-    same_site="none",
+    # same_site="none",
     # domain=".aurelialabs.net",
 ) 
+
+
+@app.middleware("http")
+async def log_cookies(request: Request, call_next):
+    cookies = request.cookies
+    logging.debug(f"Incoming cookies: {cookies}")
+    response = await call_next(request)
+    return response
 
 # home route
 @app.get("/")
