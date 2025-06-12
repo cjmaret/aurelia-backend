@@ -21,7 +21,7 @@ oauth.register(
 oauth.register(
     name="apple",
     client_id=Config.APPLE_CLIENT_ID,
-    client_secret=generate_apple_client_secret(),
+    client_secret=lambda: generate_apple_client_secret(),
     authorize_url="https://appleid.apple.com/auth/authorize",
     access_token_url="https://appleid.apple.com/auth/token",
     api_base_url="https://appleid.apple.com",
