@@ -217,6 +217,7 @@ async def google_callback(request):
         f"Session keys at Google callback: {list(request.session.keys())}")
     try:
         token = await oauth.google.authorize_access_token(request)
+        request.session.clear()
         logger.debug(f"Token received from Google: {token}")
         user_info = token.get("userinfo")
         if not user_info:
@@ -235,6 +236,7 @@ async def google_callback(request):
         logger.info(f"Redirecting to: {redirect_uri}")
         return RedirectResponse(redirect_uri)
     except Exception as e:
+        request.session.clear()
         logger.exception("Google OAuth callback error")
         print("Google OAuth callback error:", e)
         raise HTTPException(status_code=400, detail=str(e))
@@ -307,6 +309,7 @@ async def apple_callback(request):
         f"Session keys at Apple callback: {list(request.session.keys())}")
     try:
         token = await oauth.apple.authorize_access_token(request)
+        request.session.clear()
         logger.debug(f"Token received from Apple: {token}")
         id_token = token.get("id_token")
         if not id_token:
@@ -335,6 +338,7 @@ async def apple_callback(request):
         logger.info(f"Redirecting to: {redirect_uri}")
         return RedirectResponse(redirect_uri)
     except Exception as e:
+        request.session.clear()
         logger.exception("Apple OAuth callback error")
         print("Apple OAuth callback error:", e)
         raise HTTPException(status_code=400, detail=str(e))
