@@ -9,7 +9,7 @@ from app.routes.corrections_route import router as corrections_router
 app = FastAPI()
 
 logging.basicConfig(
-    level=logging.INFO,  # Set the logging level to INFO
+    level=logging.DEBUG,  # Set the logging level to INFO
     format="%(asctime)s [%(levelname)s] %(message)s",  # Log format
     datefmt="%Y-%m-%d %H:%M:%S",  # Date format
 )
