@@ -20,7 +20,7 @@ app.add_middleware(
     secret_key=Config.SECRET_KEY,  
     session_cookie="session",
     # https_only=True,
-    # same_site="none",
+    same_site="none",
     # domain=".aurelialabs.net",
 ) 
 
