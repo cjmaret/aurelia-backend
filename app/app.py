@@ -20,7 +20,7 @@ app.add_middleware(
     secret_key=Config.SECRET_KEY,  
     session_cookie="session",
     https_only=True,
-    same_site="lax"
+    same_site="none",
 ) 
 
 # home route
