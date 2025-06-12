@@ -1,3 +1,4 @@
+import logging
 from app.config import Config
 from app.services.email_service import send_email_verification, send_email_verified_notification, send_password_change_notification, send_password_reset_email
 from app.utils.auth_utils import create_email_verification_token, decode_email_verification_token, decode_password_reset_token
@@ -193,16 +194,26 @@ def reset_password(token: str, new_password: str):
     return {"success": True, "message": "Password has been reset successfully"}
 
 
+logger = logging.getLogger("google_auth")
+
+
 async def login_with_google(request):
+    logger.info("Starting Google OAuth login flow")
+    logger.debug(f"Session before Google login: {request.session}")
     redirect_uri = Config.GOOGLE_REDIRECT_URI
+    logger.debug(f"Redirect URI for Google OAuth: {redirect_uri}")
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
 
 async def google_callback(request):
+    logger.info("Google OAuth callback received")
+    logger.debug(f"Session at Google callback: {request.session}")
     try:
         token = await oauth.google.authorize_access_token(request)
-        user_info = token.get("userinfo")  # retrieve user info from the token
+        logger.debug(f"Token received from Google: {token}")
+        user_info = token.get("userinfo")
         if not user_info:
+            logger.error("No user_info found in Google response")
             raise HTTPException(
                 status_code=400, detail="Failed to retrieve user info")
 
@@ -212,38 +223,42 @@ async def google_callback(request):
 
         redirect_uri = (
             f"{Config.AURELIA_REDIRECT_URI}/google-callback"
-            # f"exp://192.168.1.104:8081/--/google-callback"
             f"?accessToken={access_token}&refreshToken={refresh_token}"
         )
-
-        # redirect to app with tokens
+        logger.info(f"Redirecting to: {redirect_uri}")
         return RedirectResponse(redirect_uri)
     except Exception as e:
+        logger.exception("Google OAuth callback error")
         print("Google OAuth callback error:", e)
         raise HTTPException(status_code=400, detail=str(e))
 
 
 def process_google_user(user_info: dict):
+    logger.info("Processing Google user")
     user_email = user_info.get("email")
     oauth_user_id = user_info.get("sub")
+    logger.debug(f"user_email: {user_email}, oauth_user_id: {oauth_user_id}")
     if not user_email or not oauth_user_id:
+        logger.error("Google account did not return required information.")
         raise HTTPException(
             status_code=400, detail="Google account did not return required information."
         )
 
     user = get_user_by_email(user_email)
+    logger.debug(f"User found by email: {user}")
 
     if user:
-        # if user exists but not with google, block login
         if not user.get("oauthProvider"):
+            logger.warning(
+                "Account exists with this email but not with Google OAuth")
             raise HTTPException(
                 status_code=400,
                 detail="An account with this email already exists. Please log in with your password."
             )
-        # if user a google user, login
+        logger.info("Returning tokens for existing Google user")
         return create_and_return_auth_tokens(user["userId"])
 
-    # if user doesnt exist, create a new user
+    logger.info("Creating new Google user")
     create_user(
         user_email=user_email,
         hashed_password=None,
@@ -253,8 +268,8 @@ def process_google_user(user_info: dict):
     )
 
     user = get_user_by_email(user_email)
+    logger.info("Returning tokens for newly created Google user")
     return create_and_return_auth_tokens(user["userId"])
-
 ##
 ##
 ##
