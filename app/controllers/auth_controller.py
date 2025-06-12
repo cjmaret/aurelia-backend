@@ -267,6 +267,7 @@ logger = logging.getLogger("apple_auth")
 
 async def login_with_apple(request):
     logger.info("Starting Apple OAuth login flow")
+    logger.debug(f"Session before Apple login: {request.session}")
     redirect_uri = Config.APPLE_REDIRECT_URI
     logger.debug(f"Redirect URI for Apple OAuth: {redirect_uri}")
     return await oauth.apple.authorize_redirect(request, redirect_uri)
@@ -274,6 +275,7 @@ async def login_with_apple(request):
 
 async def apple_callback(request):
     logger.info("Apple OAuth callback received")
+    logger.debug(f"Session at Apple callback: {request.session}")
     try:
         token = await oauth.apple.authorize_access_token(request)
         logger.debug(f"Token received from Apple: {token}")
