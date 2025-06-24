@@ -5,7 +5,7 @@ from typing import Optional
 class UserDetailsResponseSchema(BaseModel):
     userId: str = Field(..., description="The unique ID of the user")
     username: Optional[str] = Field(None, description="The name of the user")
-    userEmail: str = Field(..., description="The email of the user")
+    userEmail: Optional[str] = Field(..., description="The email of the user")
     emailVerified: bool = Field(
         False, description="Whether the user's email is verified")
     targetLanguage: Optional[str] = Field(
@@ -16,3 +16,5 @@ class UserDetailsResponseSchema(BaseModel):
         False, description="Whether the user has completed the setup process")
     oauthProvider: Optional[str] = Field(
         None, description="The OAuth provider used for authentication (if any)")
+    isAnonymous: bool = Field(
+        False, description="Whether the user is an anonymous user")

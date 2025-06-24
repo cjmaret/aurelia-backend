@@ -1,15 +1,75 @@
+import secrets
+from app.services.database_service import create_user
 import logging
 from app.config import Config
 from app.services.email_service import send_email_verification, send_email_verified_notification, send_password_change_notification, send_password_reset_email
-from app.utils.auth_utils import create_email_verification_token, decode_email_verification_token, decode_password_reset_token
+from app.utils.auth_utils import create_and_return_auth_tokens, create_email_verification_token, decode_email_verification_token, decode_password_reset_token
 from app.services.database_service import delete_corrections_by_user_id, delete_user_by_id, update_user_details_in_db
 from fastapi import HTTPException
 from fastapi.responses import RedirectResponse
 import jwt
 from jose import jwt
-from app.services.database_service import get_user_by_email, create_user, get_user_by_id, get_user_by_refresh_token, store_refresh_token, update_user_password_in_db
-from app.utils.auth_utils import ALGORITHM, SECRET_KEY, create_access_token, create_password_reset_token, create_refresh_token, verify_password, hash_password
+from app.services.database_service import get_user_by_email, create_user, get_user_by_id, get_user_by_refresh_token, update_user_password_in_db
+from app.utils.auth_utils import ALGORITHM, SECRET_KEY, create_password_reset_token, verify_password, hash_password
 from app.services.oauth_service import oauth
+
+
+def register_anonymous_user():
+    user_secret = secrets.token_urlsafe(32)
+
+    user_id = create_user(
+        user_email=None,
+        hashed_password=None,
+        email_verified=True,
+        initial_verification_email_sent=True,
+        oauth_provider=None,
+        oauth_user_id=None,
+        is_anonymous=True,
+        anon_user_secret=user_secret
+    )
+    response = create_and_return_auth_tokens(user_id)
+    response.update({
+        "userId": user_id,
+        "userSecret": user_secret
+    })
+    return response
+
+
+def restore_anonymous_user(user_id: str, user_secret: str):
+    user = get_user_by_id(user_id)
+    if not user or not user.get("isAnonymous"):
+        raise HTTPException(status_code=404, detail="Anonymous user not found")
+    if user.get("anonUserSecret") != user_secret:
+        raise HTTPException(status_code=403, detail="Invalid user secret")
+    return create_and_return_auth_tokens(user_id)
+
+
+def upgrade_anonymous_user(user_id: str, user_secret: str, user_email: str, password: str):
+    user = get_user_by_id(user_id)
+    if not user or not user.get("isAnonymous"):
+        raise HTTPException(status_code=404, detail="Anonymous user not found")
+    if user.get("anonUserSecret") != user_secret:
+        raise HTTPException(status_code=403, detail="Invalid user secret")
+    if get_user_by_email(user_email):
+        raise HTTPException(status_code=400, detail="Email already exists")
+
+    hashed_password = hash_password(password)
+    update_user_details_in_db(
+        user_id,
+        {
+            "userEmail": user_email.strip().lower(),
+            "password": hashed_password,
+            "isAnonymous": False,
+            "anonUserSecret": None,
+            "emailVerified": False,
+            "initialVerificationEmailSent": False,
+        }
+    )
+    response = create_and_return_auth_tokens(user_id)
+    response.update({
+        "userId": user_id,
+    })
+    return response
 
 
 def login_user(user_email: str, password: str):
@@ -285,7 +345,7 @@ def process_google_user(user_info: dict):
 ##
 ##
 
-import logging
+
 logger = logging.getLogger("apple_auth")
 
 
@@ -381,17 +441,3 @@ def process_apple_user(user_info: dict):
     user = get_user_by_email(user_email)
     logger.info("Returning tokens for newly created Apple user")
     return create_and_return_auth_tokens(user["userId"])
-
-
-def create_and_return_auth_tokens(user_id: str):
-    access_token = create_access_token(data={"sub": str(user_id)})
-    refresh_token = create_refresh_token(data={"sub": str(user_id)})
-
-    # store refresh token in database
-    store_refresh_token(user_id, refresh_token)
-
-    return {
-        "accessToken": access_token,
-        "refreshToken": refresh_token,
-        "tokenType": "bearer"
-    }

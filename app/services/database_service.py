@@ -49,18 +49,22 @@ def get_user_by_email(user_email: str) -> DbUserSchema | None:
 
 
 def create_user(
-        user_email: str,
+        user_email: str = None,
         hashed_password: str = None,
         email_verified: bool = False,
+        initial_verification_email_sent: bool = False,
         oauth_provider: str = None,
-        oauth_user_id: str = None
+        oauth_user_id: str = None,
+        is_anonymous: bool = False,
+        anon_user_secret: str = None,
 ) -> None:
     users_collection = get_collection("users")
+    user_id = str(uuid.uuid4())
     new_user = DbUserSchema(
-        userId=str(uuid.uuid4()),
-        userEmail=user_email.strip().lower(),
+        userId=user_id,
+        userEmail=user_email.strip().lower() if user_email else None,
         emailVerified=email_verified,
-        initialVerificationEmailSent=False,
+        initialVerificationEmailSent=initial_verification_email_sent,
         username="New User",
         targetLanguage="en",
         appLanguage="en",
@@ -69,8 +73,11 @@ def create_user(
         password=hashed_password,
         oauthProvider=oauth_provider,
         oauthUserId=oauth_user_id,
+        isAnonymous=is_anonymous,
+        anonUserSecret=anon_user_secret
     )
     users_collection.insert_one(new_user.dict())
+    return user_id
 
 
 def delete_user_by_id(user_id: str) -> bool:

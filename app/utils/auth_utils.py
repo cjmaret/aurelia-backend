@@ -4,6 +4,7 @@ from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from app.config import Config
+from app.services.database_service import store_refresh_token
 
 SECRET_KEY = Config.SECRET_KEY
 ALGORITHM = Config.ALGORITHM
@@ -16,6 +17,20 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
  
+
+def create_and_return_auth_tokens(user_id: str):
+    access_token = create_access_token(data={"sub": str(user_id)})
+    refresh_token = create_refresh_token(data={"sub": str(user_id)})
+
+    # store refresh token in database
+    store_refresh_token(user_id, refresh_token)
+
+    return {
+        "accessToken": access_token,
+        "refreshToken": refresh_token,
+        "tokenType": "bearer"
+    }
+
 def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)

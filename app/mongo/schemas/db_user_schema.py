@@ -5,7 +5,7 @@ from datetime import datetime
 class DbUserSchema(BaseModel):
     userId: str
     username: str
-    userEmail: str
+    userEmail: Optional[str] = None
     emailVerified: bool = False
     initialVerificationEmailSent: bool = False
     targetLanguage: str
@@ -16,3 +16,5 @@ class DbUserSchema(BaseModel):
     oauthProvider: Optional[str] = None 
     oauthUserId: Optional[str] = None
     refreshToken: Optional[str] = None
+    isAnonymous: bool = False
+    anonUserSecret: Optional[str] = None

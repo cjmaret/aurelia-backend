@@ -9,9 +9,9 @@ from app.routes.corrections_route import router as corrections_router
 app = FastAPI()
 
 logging.basicConfig(
-    level=logging.DEBUG,  # Set the logging level to INFO
-    format="%(asctime)s [%(levelname)s] %(message)s",  # Log format
-    datefmt="%Y-%m-%d %H:%M:%S",  # Date format
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s", 
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
  
 # middleware required for authlib (Google OAuth)
@@ -25,12 +25,12 @@ app.add_middleware(
 ) 
 
 
-@app.middleware("http")
-async def log_cookies(request: Request, call_next):
-    cookies = request.cookies
-    logging.debug(f"Incoming cookies: {cookies}")
-    response = await call_next(request)
-    return response
+# @app.middleware("http")
+# async def log_cookies(request: Request, call_next):
+#     cookies = request.cookies
+#     logging.debug(f"Incoming cookies: {cookies}")
+#     response = await call_next(request)
+#     return response
 
 # home route
 @app.get("/")

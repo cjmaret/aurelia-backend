@@ -21,6 +21,7 @@ def get_user_details(user_id: str):
         appLanguage=user.get("appLanguage"),
         setupComplete=user.get("setupComplete", False),
         oauthProvider=user.get("oauthProvider", None),
+        isAnonymous=user.get("isAnonymous", False),
     )
 
 
@@ -47,6 +48,7 @@ def update_user_details(user_id: str, user_details: UserDetailsRequestSchema):
         appLanguage=updated_user.get("appLanguage"),
         setupComplete=updated_user.get("setupComplete", False),
         oauthProvider=updated_user.get("oauthProvider", None),
+        isAnonymous=updated_user.get("isAnonymous", False),
     )
 
 
