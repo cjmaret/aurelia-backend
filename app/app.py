@@ -4,7 +4,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.config import Config
 from app.routes.auth_route import router as auth_router
 from app.routes.user_route import router as user_router
-from app.routes.corrections_route import router as corrections_router
+from app.routes.conversations_route import router as conversations_route
 
 app = FastAPI()
 
@@ -39,4 +39,4 @@ def home():
 
 app.include_router(auth_router)
 app.include_router(user_router)
-app.include_router(corrections_router)
+app.include_router(conversations_route)

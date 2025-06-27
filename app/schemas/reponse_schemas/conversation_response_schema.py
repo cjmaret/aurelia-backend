@@ -18,21 +18,21 @@ class SentenceFeedbackResponse(BaseModel):
     errors: List[GrammarErrorResponse]
 
 
-class CorrectionData(BaseModel):
+class ConversationData(BaseModel):
     conversationId: str
     createdAt: datetime
     originalText: str
     sentenceFeedback: List[SentenceFeedbackResponse]
 
 
-class PaginatedCorrectionsResponse(BaseModel):
-    corrections: List[CorrectionData]
+class PaginatedConversationsResponse(BaseModel):
+    conversations: List[ConversationData]
     total: int
     page: int
     limit: int
 
 
-class CorrectionResponse(BaseModel):
+class ConversationResponse(BaseModel):
     success: bool
-    data: Optional[Union[List[CorrectionData], PaginatedCorrectionsResponse]]
+    data: Optional[Union[List[ConversationData], PaginatedConversationsResponse]]
     error: Optional[str]

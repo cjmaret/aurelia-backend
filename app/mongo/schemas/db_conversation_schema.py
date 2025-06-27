@@ -19,7 +19,7 @@ class DbSentenceFeedback(BaseModel):
     errors: List[DbError]
 
 
-class DbCorrection(BaseModel):
+class DbConversation(BaseModel):
     userId: str
     conversationId: str
     createdAt: datetime

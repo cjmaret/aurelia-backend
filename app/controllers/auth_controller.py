@@ -4,7 +4,7 @@ import logging
 from app.config import Config
 from app.services.email_service import send_email_verification, send_email_verified_notification, send_password_change_notification, send_password_reset_email
 from app.utils.auth_utils import create_and_return_auth_tokens, create_email_verification_code, create_password_reset_code, verify_email_verification_code, verify_password_reset_code, ALGORITHM, SECRET_KEY, verify_password, hash_password
-from app.services.database_service import delete_corrections_by_user_id, delete_user_by_id, update_user_details_in_db, get_user_by_email, create_user, get_user_by_id, get_user_by_refresh_token, update_user_password_in_db
+from app.services.database_service import delete_all_conversations_by_user_id, delete_user_by_id, update_user_details_in_db, get_user_by_email, create_user, get_user_by_id, get_user_by_refresh_token, update_user_password_in_db
 from fastapi import HTTPException
 from fastapi.responses import RedirectResponse
 import jwt
@@ -19,7 +19,6 @@ def register_anonymous_user():
         user_email=None,
         hashed_password=None,
         email_verified=True,
-        initial_verification_email_sent=True,
         oauth_provider=None,
         oauth_user_id=None,
         is_anonymous=True,
@@ -128,7 +127,7 @@ def verify_email(user_id: str, code: str):
 
     update_user_details_in_db(user_id, {"emailVerified": True})
 
-    send_email_verified_notification(user["userEmail"])
+    send_email_verified_notification(user_email=user["userEmail"])
 
     return {"success": True, "message": "Email address verified!"}
 
@@ -138,7 +137,7 @@ def delete_user(user_id: str):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    delete_corrections_by_user_id(user_id)
+    delete_all_conversations_by_user_id(user_id)
 
     delete_result = delete_user_by_id(user_id)
     if not delete_result:
@@ -204,6 +203,7 @@ def update_user_password(user_id: str, current_password: str, new_password: str)
     send_password_change_notification(user["userEmail"])
 
     return {"success": True, "message": "Password updated successfully"}
+
 
 def request_password_reset(user_email: str):
     user = get_user_by_email(user_email)

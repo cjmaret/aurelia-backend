@@ -4,9 +4,9 @@ import uuid
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from app.mongo.MongoClient import get_mongo_client
-from app.mongo.schemas.db_correction_schema import DbCorrection
+from app.mongo.schemas.db_conversation_schema import DbConversation
 from app.mongo.schemas.db_user_schema import DbUserSchema
-from app.schemas.reponse_schemas.correction_response_schema import CorrectionData, CorrectionResponse
+from app.schemas.reponse_schemas.conversation_response_schema import ConversationData, ConversationResponse
 from app.schemas.request_schemas.user_details_request_schema import UserDetailsRequestSchema
 
 
@@ -52,7 +52,6 @@ def create_user(
         user_email: str = None,
         hashed_password: str = None,
         email_verified: bool = False,
-        initial_verification_email_sent: bool = False,
         oauth_provider: str = None,
         oauth_user_id: str = None,
         is_anonymous: bool = False,
@@ -110,46 +109,51 @@ def update_user_password_in_db(user_id: str, hashed_password: str):
     return result
 
 
-def get_corrections_by_user_id(user_id: str, page: int, limit: int) -> CorrectionResponse:
+def get_conversations_by_user_id(user_id: str, page: int, limit: int) -> ConversationResponse:
     try:
-        corrections_collection = get_collection("corrections")
+        conversations_collection = get_collection("conversations")
 
         # num of documents to skip
         skip = (page - 1) * limit
 
         # fetch with pagination
-        corrections_cursor = corrections_collection.find(
+        conversations_cursor = conversations_collection.find(
             {"userId": user_id}, {"_id": 0}
         ).sort("createdAt", -1).skip(skip).limit(limit)
 
         # convert cursor to list
-        corrections = list(corrections_cursor)
+        conversations = list(conversations_cursor)
 
-        total_corrections = corrections_collection.count_documents(
+        total_conversations = conversations_collection.count_documents(
             {"userId": user_id})
 
-        return CorrectionResponse(
+        return ConversationResponse(
             success=True,
             data={
-                "corrections": corrections,
-                "total": total_corrections,
+                "conversations": conversations,
+                "total": total_conversations,
                 "page": page,
                 "limit": limit
             },
             error=None
         )
     except Exception as e:
-        return CorrectionResponse(
+        return ConversationResponse(
             success=False,
             data=None,
-            error=f"An error occurred while fetching corrections: {str(e)}"
+            error=f"An error occurred while fetching conversations: {str(e)}"
         )
+    
+def get_conversation_by_user_id(user_id: str, conversation_id: str) -> dict | None:
+    conversations_collection = get_collection("conversations")
+    return conversations_collection.find_one({
+        "userId": user_id,
+        "conversationId": conversation_id
+    }, {"_id": 0})
 
-
-def upsert_correction(response: dict, user_id) -> CorrectionResponse:
-
+def upsert_conversation(response: dict, user_id) -> ConversationResponse:
     if not response.get("success") or "data" not in response or not response["data"]:
-        return CorrectionResponse(
+        return ConversationResponse(
             success=False,
             data=None,
             error="Invalid response object. Missing required fields"
@@ -157,37 +161,37 @@ def upsert_correction(response: dict, user_id) -> CorrectionResponse:
 
     data = response["data"]
 
-    corrections_collection = get_collection("corrections")
+    conversations_collection = get_collection("conversations")
 
     data["userId"] = user_id
     created_at_datetime = datetime.strptime(
         data["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
-    # check if a recent correction exists in the db
-    existing_data = check_for_recent_correction(
-        user_id, corrections_collection, created_at_datetime)
+    # check if a recent conversation exists in the db
+    existing_data = check_for_recent_conversation(
+        user_id, conversations_collection, created_at_datetime)
 
     if existing_data:
         if existing_data["userId"] != user_id:
             raise HTTPException(
-                status_code=403, detail="You do not have permission to modify this correction.")
+                status_code=403, detail="You do not have permission to modify this conversation.")
 
-        print(f"Existing data found. Merging data.")
-        return merge_correction(corrections_collection, existing_data, created_at_datetime, data)
+        print(f"Existing conversation found. Merging conversation.")
+        return merge_conversation(conversations_collection, existing_data, created_at_datetime, data)
     else:
         print(
-            f"Existing correction not found. Creating new correction.")
-        return create_new_correction(corrections_collection, created_at_datetime, data)
+            f"Existing conversation not found. Creating new conversation.")
+        return create_new_conversation(conversations_collection, created_at_datetime, data)
 
 
-def create_new_correction(collection, created_at_datetime: datetime, data: CorrectionData) -> CorrectionResponse:
+def create_new_conversation(collection, created_at_datetime: datetime, data: ConversationData) -> ConversationResponse:
     # check and use only if valid feedback
     valid_feedback = [
         feedback for feedback in data["sentenceFeedback"]
         if "id" in feedback and "original" in feedback and "corrected" in feedback and "errors" in feedback
     ]
 
-    new_correction = DbCorrection(
+    new_conversation = DbConversation(
         userId=data["userId"],
         conversationId=str(uuid.uuid4()),
         createdAt=created_at_datetime,
@@ -195,21 +199,21 @@ def create_new_correction(collection, created_at_datetime: datetime, data: Corre
         sentenceFeedback=valid_feedback,
     )
 
-    collection.insert_one(new_correction.dict(by_alias=True))
+    collection.insert_one(new_conversation.dict(by_alias=True))
 
-    return CorrectionResponse(
+    return ConversationResponse(
         success=True,
-        data=[CorrectionData(
-            conversationId=new_correction.conversationId,
-            createdAt=new_correction.createdAt,
-            originalText=new_correction.originalText,
+        data=[ConversationData(
+            conversationId=new_conversation.conversationId,
+            createdAt=new_conversation.createdAt,
+            originalText=new_conversation.originalText,
             sentenceFeedback=valid_feedback
         )],
         error=None
     )
 
 
-def merge_correction(collection, existing_data: dict, created_at_datetime: datetime, data: CorrectionData) -> CorrectionResponse:
+def merge_conversation(collection, existing_data: dict, created_at_datetime: datetime, data: ConversationData) -> ConversationResponse:
 
     if not existing_data:
         return {"success": False, "data": None, "error": "Existing data not found in the database."}
@@ -227,9 +231,9 @@ def merge_correction(collection, existing_data: dict, created_at_datetime: datet
     if "_id" in existing_data:
         existing_data["_id"] = str(existing_data["_id"])
 
-    return CorrectionResponse(
+    return ConversationResponse(
         success=True,
-        data=[CorrectionData(
+        data=[ConversationData(
             conversationId=existing_data["conversationId"],
             createdAt=existing_data["createdAt"],
             originalText=existing_data["originalText"],
@@ -239,35 +243,35 @@ def merge_correction(collection, existing_data: dict, created_at_datetime: datet
     )
 
 
-def check_for_recent_correction(user_id: str, collection, created_at_datetime: datetime) -> Optional[DbCorrection]:
+def check_for_recent_conversation(user_id: str, collection, created_at_datetime: datetime) -> Optional[DbConversation]:
 
-    # find most recent correction
-    most_recent_correction = (
+    # find most recent conversation
+    most_recent_conversation = (
         collection
         .find({"userId": user_id})
         .sort("createdAt", -1)  # descending order
         .limit(1)
     )
 
-    most_recent_correction = next(most_recent_correction, None)
+    most_recent_conversation = next(most_recent_conversation, None)
 
-    if most_recent_correction:
-        time_diff = created_at_datetime - most_recent_correction["createdAt"]
+    if most_recent_conversation:
+        time_diff = created_at_datetime - most_recent_conversation["createdAt"]
 
         if time_diff < timedelta(minutes=.5):
-            return most_recent_correction
+            return most_recent_conversation
 
     return None
 
 
-def search_corrections_in_db(user_id: str, query: str, page: int, limit: int) -> CorrectionResponse:
+def search_conversations_in_db(user_id: str, query: str, page: int, limit: int) -> ConversationResponse:
     try:
-        corrections_collection = get_collection("corrections")
+        conversations_collection = get_collection("conversations")
 
         skip = (page - 1) * limit
 
         # text search
-        corrections_cursor = corrections_collection.find(
+        conversations_cursor = conversations_collection.find(
             {
                 "userId": user_id,
                 "$text": {"$search": query}
@@ -275,44 +279,51 @@ def search_corrections_in_db(user_id: str, query: str, page: int, limit: int) ->
             {"_id": 0}
         ).sort("createdAt", -1).skip(skip).limit(limit)
 
-        corrections = list(corrections_cursor)
+        conversations = list(conversations_cursor)
 
-        total_corrections = corrections_collection.count_documents(
+        total_conversations = conversations_collection.count_documents(
             {
                 "userId": user_id,
                 "$text": {"$search": query}
             }
         )
 
-        return CorrectionResponse(
+        return ConversationResponse(
             success=True,
             data={
-                "corrections": corrections,
-                "total": total_corrections,
+                "conversations": conversations,
+                "total": total_conversations,
                 "page": page,
                 "limit": limit
             },
             error=None
         )
     except Exception as e:
-        return CorrectionResponse(
+        return ConversationResponse(
             success=False,
             data=None,
-            error=f"An error occurred while searching corrections: {str(e)}"
+            error=f"An error occurred while searching conversations: {str(e)}"
         )
 
 
-def delete_correction_by_id(conversation_id: str) -> bool:
-    print(f"Deleting correction with conversationId: {conversation_id}")
-    corrections_collection = get_collection("corrections")
-    result = corrections_collection.delete_one(
+def delete_conversation_by_id(conversation_id: str) -> bool:
+    conversations_collection = get_collection("conversations")
+    result = conversations_collection.delete_one(
         {"conversationId": conversation_id})
     return result.deleted_count > 0
 
 
-def delete_corrections_by_user_id(user_id: str) -> int:
-    corrections_collection = get_collection("corrections")
-    result = corrections_collection.delete_many({"userId": user_id})
+def delete_correction_from_conversation(conversation_id: str, correction_id: str) -> bool:
+    conversations_collection = get_collection("conversations")
+    result = conversations_collection.update_one(
+        {"conversationId": conversation_id},
+        {"$pull": {"sentenceFeedback": {"id": correction_id}}}
+    )
+    return result.modified_count > 0
+
+def delete_all_conversations_by_user_id(user_id: str) -> int:
+    conversations_collection = get_collection("conversations")
+    result = conversations_collection.delete_many({"userId": user_id})
     return result.deleted_count
 
 

@@ -4,9 +4,12 @@ from datetime import datetime, timedelta
 from app import app  # Import your FastAPI app
 from app.services.database_service import get_collection
 
+
+# THIS FILE IS A PLACEHOLDER FOR TESTING CONVERSATIONS, DEMO OF PYTHON TEST FILE STRUCTURE
+
 client = TestClient(app)
 
-corrections_collection = get_collection("corrections")
+conversations_collection = get_collection("conversations")
 
 
 USER_A_TOKEN = "user_a_token"
@@ -29,7 +32,7 @@ def patch_decode_token(monkeypatch):
 
 def create_correction(file_content: str, token: str):
     response = client.post(
-        "/api/v1/corrections",
+        "/api/v1/conversations",
         headers={"Authorization": f"Bearer {token}"},
         files={"file": ("test.txt", file_content)},
     )
