@@ -56,8 +56,11 @@ def request_email_verification_route(
 
 
 @router.post("/auth/verify-email")
-def verify_email_route(request: VerifyEmailRequestSchema):
-    return verify_email(request.token)
+def verify_email_route(
+    request: VerifyEmailRequestSchema,
+    user_id: str = Depends(get_current_user_from_token)
+):
+    return verify_email(user_id, request.code)
 
 
 @router.delete("/delete-user")
@@ -87,11 +90,10 @@ def request_password_reset_route(request: RequestPasswordResetRequest):
 
 @router.post("/auth/reset-password")
 def reset_password_route(request: ResetPasswordRequest):
-    return reset_password(request.token, request.newPassword)
+    return reset_password(request.userEmail, request.code, request.newPassword)
+
 
 # third party authentication routes
-
-
 @router.get("/auth/login/google")
 async def login_with_google_route(request: Request):
     return await login_with_google(request)

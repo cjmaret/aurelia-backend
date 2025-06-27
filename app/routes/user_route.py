@@ -21,6 +21,7 @@ def update_user_details_route(
 ):
     return update_user_details(user_id, userDetails)
 
+
 @router.post("/api/v1/user/request-email-change")
 def request_email_change_route(
     request: RequestEmailChangeRequestSchema,
@@ -30,5 +31,8 @@ def request_email_change_route(
 
 
 @router.post("/api/v1/user/change-email")
-def change_email_route(request: ChangeEmailRequestSchema):
-    return change_user_email(request.token, request.password)
+def change_email_route(
+    request: ChangeEmailRequestSchema,
+    user_id: str = Depends(get_current_user_from_token)
+):
+    return change_user_email(user_id, request.newEmail, request.code)

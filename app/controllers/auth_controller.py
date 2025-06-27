@@ -3,14 +3,12 @@ from app.services.database_service import create_user
 import logging
 from app.config import Config
 from app.services.email_service import send_email_verification, send_email_verified_notification, send_password_change_notification, send_password_reset_email
-from app.utils.auth_utils import create_and_return_auth_tokens, create_email_verification_token, decode_email_verification_token, decode_password_reset_token
-from app.services.database_service import delete_corrections_by_user_id, delete_user_by_id, update_user_details_in_db
+from app.utils.auth_utils import create_and_return_auth_tokens, create_email_verification_code, create_password_reset_code, verify_email_verification_code, verify_password_reset_code, ALGORITHM, SECRET_KEY, verify_password, hash_password
+from app.services.database_service import delete_corrections_by_user_id, delete_user_by_id, update_user_details_in_db, get_user_by_email, create_user, get_user_by_id, get_user_by_refresh_token, update_user_password_in_db
 from fastapi import HTTPException
 from fastapi.responses import RedirectResponse
 import jwt
 from jose import jwt
-from app.services.database_service import get_user_by_email, create_user, get_user_by_id, get_user_by_refresh_token, update_user_password_in_db
-from app.utils.auth_utils import ALGORITHM, SECRET_KEY, create_password_reset_token, verify_password, hash_password
 from app.services.oauth_service import oauth
 
 
@@ -91,10 +89,12 @@ def login_user(user_email: str, password: str):
         )
 
     if not user['emailVerified'] and not user['initialVerificationEmailSent']:
-        token = create_email_verification_token(
-            user["userId"], user["userEmail"])
-        send_email_verification(user['userEmail'], token)
-        print('Sent initial verification email, preparing to update user record.')
+        # token = create_email_verification_token(
+        #     user["userId"], user["userEmail"])
+        # send_email_verification(user['userEmail'], token)
+        code = create_email_verification_code(user["userId"])
+        send_email_verification(user["userEmail"], code)
+
         update_user_details_in_db(
             user["userId"], {"initialVerificationEmailSent": True})
 
@@ -122,21 +122,25 @@ def request_email_verification(user_id: str):
         raise HTTPException(
             status_code=400, detail="Google sign-in users cannot set or reset their email.")
 
-    token = create_email_verification_token(user_id, user["userEmail"])
-    send_email_verification(user["userEmail"], token)
+    code = create_email_verification_code(user_id)
+
+    send_email_verification(user["userEmail"], code)
+
     return {"success": True, "message": "Verification email sent to your address."}
 
 
-def verify_email(token: str):
-    # returns a tuple, both must be unpacked
-    user_id, email = decode_email_verification_token(token)
+def verify_email(user_id: str, code: str):
     user = get_user_by_id(user_id)
-
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    if not verify_email_verification_code(user_id, code):
+        raise HTTPException(status_code=400, detail="Invalid or expired code")
+
     update_user_details_in_db(user_id, {"emailVerified": True})
-    send_email_verified_notification(email)
+
+    send_email_verified_notification(user["userEmail"])
+
     return {"success": True, "message": "Email address verified!"}
 
 
@@ -212,7 +216,6 @@ def update_user_password(user_id: str, current_password: str, new_password: str)
 
     return {"success": True, "message": "Password updated successfully"}
 
-
 def request_password_reset(user_email: str):
     user = get_user_by_email(user_email)
     if user and user.get("oauthProvider") == "google":
@@ -224,26 +227,28 @@ def request_password_reset(user_email: str):
     if not user:
         return {"success": True, "message": "If this email is registered, a reset link has been sent."}
 
-    reset_token = create_password_reset_token(user["userId"])
-    send_password_reset_email(user_email, reset_token)
+    reset_code = create_password_reset_code(user["userId"])
+    send_password_reset_email(user_email, reset_code)
 
     return {"success": True, "message": "If this email is registered, a reset link has been sent."}
 
 
-def reset_password(token: str, new_password: str):
-    user_id = decode_password_reset_token(token)
-    user = get_user_by_id(user_id)
+def reset_password(email: str, code: str, new_password: str):
+    user = get_user_by_email(email)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    if user and user.get("oauthProvider") == "google":
+    if user.get("oauthProvider") == "google":
         raise HTTPException(
             status_code=400, detail="This account uses Google sign-in. Use 'Sign in with Google' instead.")
     if len(new_password) < 8:
         raise HTTPException(
             status_code=400, detail="Password must be at least 8 characters long")
 
+    if not verify_password_reset_code(user["userId"], code):
+        raise HTTPException(status_code=400, detail="Invalid or expired code")
+
     hashed_password = hash_password(new_password)
-    update_result = update_user_password_in_db(user_id, hashed_password)
+    update_result = update_user_password_in_db(user["userId"], hashed_password)
 
     if update_result.modified_count == 0:
         raise HTTPException(

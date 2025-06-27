@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
 class ResetPasswordRequest(BaseModel):
-    token: str
+    userEmail: str
+    code: str
     newPassword: str

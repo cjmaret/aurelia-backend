@@ -103,7 +103,7 @@ def update_user_details_in_db(user_id: str, userDetails: UserDetailsRequestSchem
 
 def update_user_password_in_db(user_id: str, hashed_password: str):
     users_collection = get_collection("users")
-    
+
     result = users_collection.update_one(
         {"userId": user_id},
         {"$set": {"password": hashed_password}}
@@ -315,3 +315,24 @@ def delete_corrections_by_user_id(user_id: str) -> int:
     corrections_collection = get_collection("corrections")
     result = corrections_collection.delete_many({"userId": user_id})
     return result.deleted_count
+
+
+def add_verification_code(user_id: str, code: str, expires_at: datetime, purpose: str, email: str = None):
+    codes_collection = get_collection("verificationCodes")
+
+    # delete any existing codes for this user and purpose
+    codes_collection.delete_many({"userId": user_id, "purpose": purpose})
+
+    codes_collection.insert_one({
+        "userId": user_id,
+        "code": code,
+        "email": email,
+        "expiresAt": expires_at,
+        "purpose": purpose,
+        "createdAt": datetime.utcnow()
+    })
+
+
+def get_verification_code(user_id: str, purpose: str):
+    codes_collection = get_collection("verificationCodes")
+    return codes_collection.find_one({"userId": user_id, "purpose": purpose})
