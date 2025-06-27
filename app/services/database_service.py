@@ -64,7 +64,6 @@ def create_user(
         userId=user_id,
         userEmail=user_email.strip().lower() if user_email else None,
         emailVerified=email_verified,
-        initialVerificationEmailSent=initial_verification_email_sent,
         username="New User",
         targetLanguage="en",
         appLanguage="en",

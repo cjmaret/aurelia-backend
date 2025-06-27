@@ -7,7 +7,6 @@ class DbUserSchema(BaseModel):
     username: str
     userEmail: Optional[str] = None
     emailVerified: bool = False
-    initialVerificationEmailSent: bool = False
     targetLanguage: str
     appLanguage: str
     createdAt: datetime

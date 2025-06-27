@@ -60,7 +60,6 @@ def upgrade_anonymous_user(user_id: str, user_secret: str, user_email: str, pass
             "isAnonymous": False,
             "anonUserSecret": None,
             "emailVerified": False,
-            "initialVerificationEmailSent": False,
         }
     )
     response = create_and_return_auth_tokens(user_id)
@@ -87,16 +86,6 @@ def login_user(user_email: str, password: str):
         raise HTTPException(
             status_code=401, detail="Invalid email or password"
         )
-
-    if not user['emailVerified'] and not user['initialVerificationEmailSent']:
-        # token = create_email_verification_token(
-        #     user["userId"], user["userEmail"])
-        # send_email_verification(user['userEmail'], token)
-        code = create_email_verification_code(user["userId"])
-        send_email_verification(user["userEmail"], code)
-
-        update_user_details_in_db(
-            user["userId"], {"initialVerificationEmailSent": True})
 
     # return access and refresh tokens
     return create_and_return_auth_tokens(user["userId"])
